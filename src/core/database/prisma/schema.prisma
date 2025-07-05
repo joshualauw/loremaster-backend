@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum TransactionStatus {
+  PENDING
+  CANCELED
+  EXPIRED
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum JobStatus {
+  PENDING
+  DONE
+  FAILED
+}
+
+// Models
+
+model User {
+  userId      Int           @id @default(autoincrement())
+  username    String        @db.VarChar(255)
+  email       String        @unique @db.VarChar(255)
+  profileUrl  String?
+  credit      Int
+  Story       Story[]
+  Transaction Transaction[]
+  createdAt   DateTime      @default(now())
+}
+
+model Transaction {
+  transactionId       Int               @id @default(autoincrement())
+  user                User              @relation(fields: [userId], references: [userId])
+  userId              Int
+  credit              Int
+  status              TransactionStatus
+  timestamp           DateTime          @default(now())
+  lastActionTimestamp DateTime
+  notes               String
+}
+
+model Story {
+  storyId   Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userId], references: [userId])
+  userId    Int
+  title     String     @db.VarChar(255)
+  tagline   String[]   @db.VarChar(255)
+  logoUrl   String?
+  Scene     Scene[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  Document  Document[]
+}
+
+model Category {
+  categoryId Int        @id @default(autoincrement())
+  name       String     @db.VarChar(255)
+  Document   Document[]
+}
+
+model Document {
+  documentId    Int             @id @default(autoincrement())
+  story         Story           @relation(fields: [storyId], references: [storyId])
+  storyId       Int
+  category      Category        @relation(fields: [categoryId], references: [categoryId])
+  categoryId    Int
+  name          String          @db.VarChar(255)
+  content       String          @db.Text()
+  jobStatus     JobStatus
+  jobReason     String?
+  DocumentChunk DocumentChunk[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model DocumentChunk {
+  documentChunkId Int                         @id @default(autoincrement())
+  document        Document                    @relation(fields: [documentId], references: [documentId])
+  documentId      Int
+  title           String                      @db.VarChar(255)
+  content         String
+  vector          Unsupported("vector(1536)")
+}
+
+model Scene {
+  sceneId     Int       @id @default(autoincrement())
+  story       Story     @relation(fields: [storyId], references: [storyId])
+  storyId     Int
+  title       String    @db.VarChar(255)
+  description String    @db.Text()
+  jobStatus   JobStatus
+  jobReason   String?
+  createdAt   DateTime  @default(now())
+}

@@ -2,7 +2,7 @@ import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from
 import { Request, Response } from "express";
 import { errorResponse } from "src/core/utils/apiResponse";
 import { toUpperUnderscore } from "src/core/utils/common";
-import { ApiResponse } from "src/types/common/ApiResponse";
+import { ApiResponse } from "src/types/ApiResponse";
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -18,11 +18,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
         if (exception instanceof HttpException) {
             status = exception.getStatus();
             const res = exception.getResponse();
+
             if (typeof res === "string") {
                 message = res;
             } else {
                 const resObj = res as Record<string, any>;
-                console.log(resObj);
                 message = resObj.message || exception.message;
                 errorCode = toUpperUnderscore(resObj.error || HttpStatus[status]);
             }

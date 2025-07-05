@@ -1,9 +1,8 @@
-export interface RegisterResponseDto {
+export interface LoginResponseDto {
     user: {
         id: number;
         email: string;
         username: string;
-        createdAt: string;
     };
     token: string;
 }

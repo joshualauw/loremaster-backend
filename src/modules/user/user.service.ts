@@ -1,22 +1,30 @@
-import { Injectable, ConflictException } from "@nestjs/common";
+import { Injectable, ConflictException, ForbiddenException, UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "src/core/database/prisma.service";
 import { RegisterDto } from "src/modules/user/dto/register.dto";
-import * as bcrypt from "bcrypt";
 import { RegisterResponseDto } from "src/modules/user/dto/register-response.dto";
+import { AuthService } from "src/modules/auth/auth.service";
+import { LoginDto } from "src/modules/user/dto/login.dto";
+import { LoginResponseDto } from "src/modules/user/dto/login-response.dto";
 
 @Injectable()
 export class UserService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private authService: AuthService,
+    ) {}
 
     async register(payload: RegisterDto): Promise<RegisterResponseDto> {
         const { email, password, username } = payload;
 
-        const existingUser = await this.prisma.user.findUnique({ where: { email } });
+        const existingUser = await this.prisma.user.findUnique({
+            where: { email },
+        });
+
         if (existingUser) {
             throw new ConflictException("Email already in use");
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await this.authService.hashPassword(password);
 
         const newUser = await this.prisma.user.create({
             data: {
@@ -24,15 +32,51 @@ export class UserService {
                 username,
                 password: hashedPassword,
                 credit: 0,
-                createdAt: new Date().toISOString(),
             },
         });
 
-        return {
-            id: newUser.userId,
+        const token = this.authService.generateToken({
+            sub: newUser.userId.toString(),
             email: newUser.email,
-            username: newUser.username,
-            createdAt: newUser.createdAt.toISOString(),
+        });
+
+        return {
+            token,
+            user: {
+                id: newUser.userId,
+                email: newUser.email,
+                username: newUser.username,
+                createdAt: newUser.createdAt.toISOString(),
+            },
+        };
+    }
+
+    async login(payload: LoginDto): Promise<LoginResponseDto> {
+        const user = await this.prisma.user.findUnique({
+            where: { email: payload.email },
+        });
+
+        if (!user) {
+            throw new UnauthorizedException("Invalid credentials");
+        }
+
+        const isMatch = await this.authService.comparePassword(payload.password, user.password);
+        if (!isMatch) {
+            throw new UnauthorizedException("Invalid credentials");
+        }
+
+        const token = this.authService.generateToken({
+            sub: user.userId.toString(),
+            email: user.email,
+        });
+
+        return {
+            token,
+            user: {
+                id: user.userId,
+                email: user.email,
+                username: user.username,
+            },
         };
     }
 }

@@ -1,10 +1,10 @@
 import { Injectable, ConflictException, ForbiddenException, UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "src/core/database/prisma.service";
-import { RegisterDto } from "src/modules/user/dto/register.dto";
-import { RegisterResponseDto } from "src/modules/user/dto/register-response.dto";
+import { RegisterDto } from "src/modules/user/dtos/register.dto";
+import { RegisterResponseDto } from "src/modules/user/dtos/register-response.dto";
 import { AuthService } from "src/modules/auth/auth.service";
-import { LoginDto } from "src/modules/user/dto/login.dto";
-import { LoginResponseDto } from "src/modules/user/dto/login-response.dto";
+import { LoginDto } from "src/modules/user/dtos/login.dto";
+import { LoginResponseDto } from "src/modules/user/dtos/login-response.dto";
 
 @Injectable()
 export class UserService {
@@ -37,13 +37,15 @@ export class UserService {
 
         const token = this.authService.generateToken({
             sub: newUser.userId.toString(),
+            id: newUser.userId,
             email: newUser.email,
+            username: newUser.username,
         });
 
         return {
             token,
             user: {
-                id: newUser.userId,
+                userId: newUser.userId,
                 email: newUser.email,
                 username: newUser.username,
                 createdAt: newUser.createdAt.toISOString(),
@@ -67,13 +69,15 @@ export class UserService {
 
         const token = this.authService.generateToken({
             sub: user.userId.toString(),
+            id: user.userId,
             email: user.email,
+            username: user.username,
         });
 
         return {
             token,
             user: {
-                id: user.userId,
+                userId: user.userId,
                 email: user.email,
                 username: user.username,
             },

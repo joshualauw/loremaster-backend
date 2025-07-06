@@ -1,4 +1,5 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from "@nestjs/common";
+import { PrismaClientValidationError } from "@prisma/client/runtime/library";
 import { Request, Response } from "express";
 import { errorResponse } from "src/core/utils/apiResponse";
 import { toUpperUnderscore } from "src/core/utils/common";
@@ -26,6 +27,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
                 message = resObj.message || exception.message;
                 errorCode = toUpperUnderscore(resObj.error || HttpStatus[status]);
             }
+        }
+
+        if (exception instanceof PrismaClientValidationError) {
+            message = "Error when creating entity";
+            errorCode = toUpperUnderscore(HttpStatus[HttpStatus.UNPROCESSABLE_ENTITY]);
         }
 
         const error: ApiResponse<null> = errorResponse(message, errorCode, request.url);

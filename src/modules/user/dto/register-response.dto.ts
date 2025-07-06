@@ -1,9 +1,0 @@
-export interface RegisterResponseDto {
-    user: {
-        id: number;
-        email: string;
-        username: string;
-        createdAt: string;
-    };
-    token: string;
-}

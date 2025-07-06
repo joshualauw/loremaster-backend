@@ -5,6 +5,7 @@ import jwtConfig from "src/config/jwt.config";
 import { AuthModule } from "src/modules/auth/auth.module";
 import { JwtAuthGuard } from "src/modules/auth/guards/jwt.guard";
 import { UserModule } from "src/modules/user/user.module";
+import { StoryModule } from './story/story.module';
 
 @Module({
     imports: [
@@ -14,6 +15,7 @@ import { UserModule } from "src/modules/user/user.module";
         }),
         UserModule,
         AuthModule,
+        StoryModule,
     ],
     providers: [
         {

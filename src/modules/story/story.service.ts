@@ -1,18 +1,23 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateStoryDto } from "./dtos/create-story.dto";
 import { PrismaService } from "src/core/database/prisma.service";
-import { CreateStoryResponseDto } from "src/story/dtos/create-story-response.dto";
-import { UpdateStoryDto } from "src/story/dtos/update-story.dto";
-import { UpdateStoryResponseDto } from "src/story/dtos/update-story-response.dto";
-import { DeleteStoryDto } from "src/story/dtos/delete-story.dto";
-import { DeleteStoryResponseDto } from "src/story/dtos/delete-story-response.dto";
-import { StoryItemDto } from "src/story/dtos/story-item.dto";
+import { CreateStoryResponseDto } from "src/modules/story/dtos/create-story-response.dto";
+import { UpdateStoryDto } from "src/modules/story/dtos/update-story.dto";
+import { UpdateStoryResponseDto } from "src/modules/story/dtos/update-story-response.dto";
+import { DeleteStoryDto } from "src/modules/story/dtos/delete-story.dto";
+import { DeleteStoryResponseDto } from "src/modules/story/dtos/delete-story-response.dto";
+import { StoryItemDto } from "src/modules/story/dtos/story-item.dto";
 import { omit } from "src/core/utils/common";
 import { mapObject } from "src/core/utils/mapper";
+import { ConfigType } from "@nestjs/config";
+import rulesConfig from "src/config/rules.config";
 
 @Injectable()
 export class StoryService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        @Inject(rulesConfig.KEY) private rules: ConfigType<typeof rulesConfig>,
+    ) {}
 
     async findAllByUser(userId: number): Promise<StoryItemDto[]> {
         const stories = await this.prisma.story.findMany({
@@ -29,7 +34,7 @@ export class StoryService {
             where: { userId },
         });
 
-        if (storyCount >= 3) {
+        if (storyCount >= this.rules.maxStoryPerUser) {
             throw new ForbiddenException("Maximum story created for free plan");
         }
 

@@ -4,7 +4,7 @@ import { CreateStoryBody } from "./dtos/create-story.dto";
 import { apiResponse } from "src/core/utils/apiResponse";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { UserJwtPayload } from "src/types/UserJwtPayload";
-import { UpdateStoryBody } from "src/story/dtos/update-story.dto";
+import { UpdateStoryBody } from "src/modules/story/dtos/update-story.dto";
 
 @Controller("story")
 export class StoryController {

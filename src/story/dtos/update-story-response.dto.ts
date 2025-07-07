@@ -1,3 +1,18 @@
-import { Story } from "@prisma/client";
+import { Expose } from "class-transformer";
 
-export type UpdateStoryResponseDto = Pick<Story, "storyId" | "userId" | "title" | "description">;
+export class UpdateStoryResponseDto {
+    @Expose()
+    storyId: number;
+
+    @Expose()
+    userId: number;
+
+    @Expose()
+    title: string;
+
+    @Expose()
+    description: string;
+
+    @Expose()
+    updatedAt: Date;
+}

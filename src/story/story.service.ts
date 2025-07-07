@@ -8,6 +8,7 @@ import { DeleteStoryDto } from "src/story/dtos/delete-story.dto";
 import { DeleteStoryResponseDto } from "src/story/dtos/delete-story-response.dto";
 import { StoryItemDto } from "src/story/dtos/story-item.dto";
 import { omit } from "src/core/utils/common";
+import { mapObject } from "src/core/utils/mapper";
 
 @Injectable()
 export class StoryService {
@@ -40,13 +41,7 @@ export class StoryService {
             },
         });
 
-        return {
-            storyId: newStory.storyId,
-            userId: newStory.userId,
-            title: newStory.title,
-            description: newStory.description,
-            createdAt: newStory.createdAt,
-        };
+        return mapObject(CreateStoryResponseDto, newStory);
     }
 
     async update(payload: UpdateStoryDto): Promise<UpdateStoryResponseDto> {
@@ -68,12 +63,7 @@ export class StoryService {
             },
         });
 
-        return {
-            storyId: updatedStory.storyId,
-            userId: updatedStory.userId,
-            title: updatedStory.title,
-            description: updatedStory.description,
-        };
+        return mapObject(UpdateStoryResponseDto, updatedStory);
     }
 
     async delete(payload: DeleteStoryDto): Promise<DeleteStoryResponseDto> {
@@ -91,8 +81,6 @@ export class StoryService {
             where: { storyId },
         });
 
-        return {
-            storyId: story.storyId,
-        };
+        return mapObject(DeleteStoryResponseDto, story);
     }
 }

@@ -5,6 +5,7 @@ import { RegisterResponseDto } from "src/modules/user/dtos/register-response.dto
 import { AuthService } from "src/modules/auth/auth.service";
 import { LoginDto } from "src/modules/user/dtos/login.dto";
 import { LoginResponseDto } from "src/modules/user/dtos/login-response.dto";
+import { mapObject } from "src/core/utils/mapper";
 
 @Injectable()
 export class UserService {
@@ -42,15 +43,7 @@ export class UserService {
             username: newUser.username,
         });
 
-        return {
-            token,
-            user: {
-                userId: newUser.userId,
-                email: newUser.email,
-                username: newUser.username,
-                createdAt: newUser.createdAt.toISOString(),
-            },
-        };
+        return mapObject(RegisterResponseDto, { token, user: newUser });
     }
 
     async login(payload: LoginDto): Promise<LoginResponseDto> {
@@ -74,13 +67,6 @@ export class UserService {
             username: user.username,
         });
 
-        return {
-            token,
-            user: {
-                userId: user.userId,
-                email: user.email,
-                username: user.username,
-            },
-        };
+        return mapObject(LoginResponseDto, { token, user });
     }
 }

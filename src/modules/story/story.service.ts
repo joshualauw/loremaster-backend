@@ -35,12 +35,12 @@ export class StoryService {
         return mapObject(CreateStoryResponseDto, newStory);
     }
 
-    async canChangeStory(ownerId: number, userId: number) {
-        await this.prisma.user.findFirstOrThrow({
-            where: { userId },
+    async canChangeStory(storyId: number, userId: number) {
+        const story = await this.prisma.story.findFirstOrThrow({
+            where: { storyId },
         });
 
-        if (ownerId != userId) {
+        if (story.userId != userId) {
             throw new ForbiddenException("User doesn't have permission to access story");
         }
     }
@@ -48,11 +48,7 @@ export class StoryService {
     async update(payload: UpdateStoryDto): Promise<UpdateStoryResponseDto> {
         const { storyId, userId, title, description } = payload;
 
-        const story = await this.prisma.story.findFirstOrThrow({
-            where: { storyId },
-        });
-
-        await this.canChangeStory(story.userId, userId);
+        await this.canChangeStory(storyId, userId);
 
         const updatedStory = await this.prisma.story.update({
             where: { storyId },
@@ -68,16 +64,12 @@ export class StoryService {
     async delete(payload: DeleteStoryDto): Promise<DeleteStoryResponseDto> {
         const { storyId, userId } = payload;
 
-        const story = await this.prisma.story.findFirstOrThrow({
+        await this.canChangeStory(storyId, userId);
+
+        const deletedStory = await this.prisma.story.delete({
             where: { storyId },
         });
 
-        await this.canChangeStory(story.userId, userId);
-
-        await this.prisma.story.delete({
-            where: { storyId },
-        });
-
-        return mapObject(DeleteStoryResponseDto, story);
+        return mapObject(DeleteStoryResponseDto, deletedStory);
     }
 }

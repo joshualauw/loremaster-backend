@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString, MaxLength } from "class-validator";
 
-export class CreateDocumentBody {
+export class UpdateDocumentBody {
     @IsString()
     @IsNotEmpty()
     name: string;
@@ -14,7 +14,7 @@ export class CreateDocumentBody {
     categoryId: number;
 }
 
-export type CreateDocumentDto = CreateDocumentBody & {
-    storyId: number;
+export type UpdateDocumentDto = UpdateDocumentBody & {
+    documentId: number;
     userId: number;
 };

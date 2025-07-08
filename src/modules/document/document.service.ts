@@ -4,7 +4,11 @@ import rulesConfig from "src/config/rules.config";
 import { PrismaService } from "src/core/database/prisma.service";
 import { mapObject } from "src/core/utils/mapper";
 import { CreateDocumentDto } from "src/modules/document/dtos/request/create-document.dto";
+import { DeleteDocumentDto } from "src/modules/document/dtos/request/delete-document.dto";
+import { UpdateDocumentDto } from "src/modules/document/dtos/request/update-document.dto";
 import { CreateDocumentResponseDto } from "src/modules/document/dtos/response/create-document-response.dto";
+import { DeleteDocumentResponseDto } from "src/modules/document/dtos/response/delete-document-response.dto";
+import { UpdateDocumentResponseDto } from "src/modules/document/dtos/response/update-document-response.dto";
 
 @Injectable()
 export class DocumentService {
@@ -13,20 +17,8 @@ export class DocumentService {
         @Inject(rulesConfig.KEY) private rules: ConfigType<typeof rulesConfig>,
     ) {}
 
-    async canChangeDocument(ownerId: number, userId: number) {
-        await this.prisma.user.findFirstOrThrow({
-            where: { userId },
-        });
-
-        if (ownerId != userId) {
-            throw new ForbiddenException("User doesn't have permission to access document");
-        }
-    }
-
-    async create(payload: CreateDocumentDto): Promise<CreateDocumentResponseDto> {
-        const { name, content, userId, storyId, categoryId } = payload;
-
-        if (content.length > this.rules.maxCharacterPerDocument) {
+    async canChangeDocument(storyId: number, userId: number, contentLength?: number) {
+        if (contentLength && contentLength > this.rules.maxCharacterPerDocument) {
             throw new BadRequestException(`Exceed content character limit of ${this.rules.maxCharacterPerDocument}`);
         }
 
@@ -34,7 +26,15 @@ export class DocumentService {
             where: { storyId },
         });
 
-        await this.canChangeDocument(story.userId, userId);
+        if (story.userId != userId) {
+            throw new ForbiddenException("User doesn't have permission to access document");
+        }
+    }
+
+    async create(payload: CreateDocumentDto): Promise<CreateDocumentResponseDto> {
+        const { name, content, userId, storyId, categoryId } = payload;
+
+        await this.canChangeDocument(storyId, userId, content.length);
 
         const newDocument = await this.prisma.document.create({
             data: {
@@ -46,5 +46,43 @@ export class DocumentService {
         });
 
         return mapObject(CreateDocumentResponseDto, newDocument);
+    }
+
+    async update(payload: UpdateDocumentDto): Promise<UpdateDocumentResponseDto> {
+        const { name, content, userId, categoryId, documentId } = payload;
+
+        const document = await this.prisma.document.findFirstOrThrow({
+            where: { documentId },
+        });
+
+        await this.canChangeDocument(document.storyId, userId, content.length);
+
+        const updatedDocument = await this.prisma.document.update({
+            where: { documentId: document.documentId },
+            data: {
+                name,
+                content,
+                categoryId,
+                jobStatus: "PENDING",
+            },
+        });
+
+        return mapObject(UpdateDocumentResponseDto, updatedDocument);
+    }
+
+    async delete(payload: DeleteDocumentDto): Promise<DeleteDocumentResponseDto> {
+        const { userId, documentId } = payload;
+
+        const document = await this.prisma.document.findFirstOrThrow({
+            where: { documentId },
+        });
+
+        await this.canChangeDocument(document.storyId, userId);
+
+        const deletedDocument = await this.prisma.document.delete({
+            where: { documentId },
+        });
+
+        return mapObject(DeleteDocumentResponseDto, deletedDocument);
     }
 }

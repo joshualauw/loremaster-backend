@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Param, Post, Put } from "@nestjs/common";
 import { apiResponse } from "src/core/utils/apiResponse";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { DocumentService } from "src/modules/document/document.service";
@@ -17,5 +17,21 @@ export class DocumentController {
     ) {
         const res = await this.documentService.create({ ...body, userId: user.id, storyId });
         return apiResponse("document created", res);
+    }
+
+    @Put(":documentId")
+    async update(
+        @Param("documentId") documentId: number,
+        @CurrentUser() user: UserJwtPayload,
+        @Body() body: CreateDocumentBody,
+    ) {
+        const res = await this.documentService.update({ ...body, userId: user.id, documentId });
+        return apiResponse("document updated", res);
+    }
+
+    @Delete(":documentId")
+    async delete(@Param("documentId") documentId: number, @CurrentUser() user: UserJwtPayload) {
+        const res = await this.documentService.delete({ userId: user.id, documentId });
+        return apiResponse("document deleted", res);
     }
 }

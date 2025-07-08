@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
 import { ConfigType } from "@nestjs/config";
 import rulesConfig from "src/config/rules.config";
 import { PrismaService } from "src/core/database/prisma.service";
@@ -14,12 +14,12 @@ import { UpdateDocumentResponseDto } from "src/modules/document/dtos/response/up
 export class DocumentService {
     constructor(
         private prisma: PrismaService,
-        @Inject(rulesConfig.KEY) private rules: ConfigType<typeof rulesConfig>,
+        @Inject(rulesConfig.KEY) private rulesCfg: ConfigType<typeof rulesConfig>,
     ) {}
 
     async canChangeDocument(storyId: number, userId: number, contentLength?: number) {
-        if (contentLength && contentLength > this.rules.maxCharacterPerDocument) {
-            throw new BadRequestException(`Exceed content character limit of ${this.rules.maxCharacterPerDocument}`);
+        if (contentLength && contentLength > this.rulesCfg.maxCharacterPerDocument) {
+            throw new BadRequestException(`Exceed content character limit of ${this.rulesCfg.maxCharacterPerDocument}`);
         }
 
         const story = await this.prisma.story.findFirstOrThrow({
@@ -44,6 +44,8 @@ export class DocumentService {
                 content,
             },
         });
+
+        //queue to redis processChunks
 
         return mapObject(CreateDocumentResponseDto, newDocument);
     }

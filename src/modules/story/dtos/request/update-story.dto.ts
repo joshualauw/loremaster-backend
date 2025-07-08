@@ -12,4 +12,5 @@ export class UpdateStoryBody {
 
 export type UpdateStoryDto = UpdateStoryBody & {
     storyId: number;
+    userId: number;
 };

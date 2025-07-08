@@ -1,10 +1,10 @@
-import { Injectable, ConflictException, ForbiddenException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, ConflictException, UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "src/core/database/prisma.service";
-import { RegisterDto } from "src/modules/user/dtos/register.dto";
-import { RegisterResponseDto } from "src/modules/user/dtos/register-response.dto";
+import { RegisterDto } from "src/modules/user/dtos/request/register.dto";
+import { RegisterResponseDto } from "src/modules/user/dtos/response/register-response.dto";
 import { AuthService } from "src/modules/auth/auth.service";
-import { LoginDto } from "src/modules/user/dtos/login.dto";
-import { LoginResponseDto } from "src/modules/user/dtos/login-response.dto";
+import { LoginDto } from "src/modules/user/dtos/request/login.dto";
+import { LoginResponseDto } from "src/modules/user/dtos/response/login-response.dto";
 import { mapObject } from "src/core/utils/mapper";
 
 @Injectable()
@@ -17,13 +17,9 @@ export class UserService {
     async register(payload: RegisterDto): Promise<RegisterResponseDto> {
         const { email, password, username } = payload;
 
-        const existingUser = await this.prisma.user.findUnique({
+        await this.prisma.user.findUniqueOrThrow({
             where: { email },
         });
-
-        if (existingUser) {
-            throw new ConflictException("Email already in use");
-        }
 
         const hashedPassword = await this.authService.hashPassword(password);
 

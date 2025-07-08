@@ -1,42 +1,28 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateStoryDto } from "./dtos/create-story.dto";
+import { CreateStoryDto } from "./dtos/request/create-story.dto";
 import { PrismaService } from "src/core/database/prisma.service";
-import { CreateStoryResponseDto } from "src/modules/story/dtos/create-story-response.dto";
-import { UpdateStoryDto } from "src/modules/story/dtos/update-story.dto";
-import { UpdateStoryResponseDto } from "src/modules/story/dtos/update-story-response.dto";
-import { DeleteStoryDto } from "src/modules/story/dtos/delete-story.dto";
-import { DeleteStoryResponseDto } from "src/modules/story/dtos/delete-story-response.dto";
-import { StoryItemDto } from "src/modules/story/dtos/story-item.dto";
-import { omit } from "src/core/utils/common";
+import { CreateStoryResponseDto } from "src/modules/story/dtos/response/create-story-response.dto";
+import { UpdateStoryDto } from "src/modules/story/dtos/request/update-story.dto";
+import { UpdateStoryResponseDto } from "src/modules/story/dtos/response/update-story-response.dto";
+import { DeleteStoryDto } from "src/modules/story/dtos/request/delete-story.dto";
+import { DeleteStoryResponseDto } from "src/modules/story/dtos/response/delete-story-response.dto";
+import { FindAllByUserDto } from "src/modules/story/dtos/response/find-all-by-user.dto";
 import { mapObject } from "src/core/utils/mapper";
-import { ConfigType } from "@nestjs/config";
-import rulesConfig from "src/config/rules.config";
 
 @Injectable()
 export class StoryService {
-    constructor(
-        private prisma: PrismaService,
-        @Inject(rulesConfig.KEY) private rules: ConfigType<typeof rulesConfig>,
-    ) {}
+    constructor(private prisma: PrismaService) {}
 
-    async findAllByUser(userId: number): Promise<StoryItemDto[]> {
+    async findAllByUser(userId: number): Promise<FindAllByUserDto[]> {
         const stories = await this.prisma.story.findMany({
             where: { userId },
         });
 
-        return stories.map((s) => omit(s, "updatedAt"));
+        return stories.map((s) => mapObject(FindAllByUserDto, s));
     }
 
     async create(payload: CreateStoryDto): Promise<CreateStoryResponseDto> {
         const { title, description, userId } = payload;
-
-        const storyCount = await this.prisma.story.count({
-            where: { userId },
-        });
-
-        if (storyCount >= this.rules.maxStoryPerUser) {
-            throw new ForbiddenException("Maximum story created for free plan");
-        }
 
         const newStory = await this.prisma.story.create({
             data: {
@@ -49,16 +35,24 @@ export class StoryService {
         return mapObject(CreateStoryResponseDto, newStory);
     }
 
-    async update(payload: UpdateStoryDto): Promise<UpdateStoryResponseDto> {
-        const { storyId, title, description } = payload;
+    async canChangeStory(ownerId: number, userId: number) {
+        await this.prisma.user.findFirstOrThrow({
+            where: { userId },
+        });
 
-        const story = await this.prisma.story.findFirst({
+        if (ownerId != userId) {
+            throw new ForbiddenException("User doesn't have permission to access story");
+        }
+    }
+
+    async update(payload: UpdateStoryDto): Promise<UpdateStoryResponseDto> {
+        const { storyId, userId, title, description } = payload;
+
+        const story = await this.prisma.story.findFirstOrThrow({
             where: { storyId },
         });
 
-        if (!story) {
-            throw new NotFoundException("Story not found");
-        }
+        await this.canChangeStory(story.userId, userId);
 
         const updatedStory = await this.prisma.story.update({
             where: { storyId },
@@ -72,15 +66,13 @@ export class StoryService {
     }
 
     async delete(payload: DeleteStoryDto): Promise<DeleteStoryResponseDto> {
-        const { storyId } = payload;
+        const { storyId, userId } = payload;
 
-        const story = await this.prisma.story.findFirst({
+        const story = await this.prisma.story.findFirstOrThrow({
             where: { storyId },
         });
 
-        if (!story) {
-            throw new NotFoundException("Story not found");
-        }
+        await this.canChangeStory(story.userId, userId);
 
         await this.prisma.story.delete({
             where: { storyId },

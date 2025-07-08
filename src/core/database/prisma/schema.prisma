@@ -45,7 +45,7 @@ model Transaction {
   status              TransactionStatus
   timestamp           DateTime          @default(now())
   lastActionTimestamp DateTime
-  notes               String
+  notes               String?
 }
 
 model Story {
@@ -75,7 +75,7 @@ model Document {
   categoryId    Int
   name          String          @db.VarChar(255)
   content       String          @db.Text()
-  jobStatus     JobStatus
+  jobStatus     JobStatus       @default(PENDING)
   jobReason     String?
   DocumentChunk DocumentChunk[]
   createdAt     DateTime        @default(now())
@@ -84,7 +84,7 @@ model Document {
 
 model DocumentChunk {
   documentChunkId Int                         @id @default(autoincrement())
-  document        Document                    @relation(fields: [documentId], references: [documentId])
+  document        Document                    @relation(fields: [documentId], references: [documentId], onDelete: Cascade)
   documentId      Int
   title           String                      @db.VarChar(255)
   content         String
@@ -97,7 +97,7 @@ model Scene {
   storyId     Int
   title       String    @db.VarChar(255)
   description String    @db.Text()
-  jobStatus   JobStatus
+  jobStatus   JobStatus @default(PENDING)
   jobReason   String?
   createdAt   DateTime  @default(now())
 }

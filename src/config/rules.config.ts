@@ -1,7 +1,5 @@
 import { registerAs } from "@nestjs/config";
 
 export default registerAs("rules", () => ({
-    maxStoryPerUser: 3,
-    maxDocumentsPerUser: 25,
-    maxCharacterPerDocument: 5000,
+    maxCharacterPerDocument: parseInt(process.env.MAX_CHARACTER_PER_DOCUMENT || "5000"),
 }));

@@ -9,11 +9,17 @@ export function apiResponse<T>(message: string, data?: T): ApiResponse<T> {
     };
 }
 
-export function errorResponse<T>(message: string, errorCode: string, path: string): ApiResponse<T> {
+export function errorResponse<T>(
+    message: string,
+    errorCode: string,
+    path: string,
+    errorList?: string[],
+): ApiResponse<T> {
     return {
         success: false,
         message,
         errorCode,
+        errorList,
         timestamp: new Date().toISOString(),
         path,
     };

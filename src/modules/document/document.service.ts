@@ -1,5 +1,8 @@
+import { InjectQueue } from "@nestjs/bullmq";
 import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
 import { ConfigType } from "@nestjs/config";
+import { Queue } from "bullmq";
+import { QueueKey } from "src/common/enums/queue.enum";
 import rulesConfig from "src/config/rules.config";
 import { PrismaService } from "src/core/database/prisma.service";
 import { mapObject } from "src/core/utils/mapper";
@@ -14,6 +17,7 @@ import { UpdateDocumentResponseDto } from "src/modules/document/dtos/response/up
 export class DocumentService {
     constructor(
         private prisma: PrismaService,
+        @InjectQueue(QueueKey.PREPROCESSING) private queue: Queue,
         @Inject(rulesConfig.KEY) private rulesCfg: ConfigType<typeof rulesConfig>,
     ) {}
 
@@ -45,7 +49,7 @@ export class DocumentService {
             },
         });
 
-        //queue to redis processChunks
+        await this.queue.add(newDocument.documentId.toString(), newDocument);
 
         return mapObject(CreateDocumentResponseDto, newDocument);
     }

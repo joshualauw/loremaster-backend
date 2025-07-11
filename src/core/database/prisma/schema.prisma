@@ -87,6 +87,7 @@ model DocumentChunk {
   document        Document                    @relation(fields: [documentId], references: [documentId], onDelete: Cascade)
   documentId      Int
   title           String                      @db.VarChar(255)
+  index           Int
   content         String
   vector          Unsupported("vector(1536)")
 }

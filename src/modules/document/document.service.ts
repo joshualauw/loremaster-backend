@@ -1,9 +1,7 @@
 import { InjectQueue } from "@nestjs/bullmq";
-import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
-import { ConfigType } from "@nestjs/config";
+import { ForbiddenException, Injectable } from "@nestjs/common";
 import { Queue } from "bullmq";
 import { QueueKey } from "src/common/enums/queue.enum";
-import rulesConfig from "src/config/rules.config";
 import { PrismaService } from "src/core/database/prisma.service";
 import { mapObject } from "src/core/utils/mapper";
 import { CreateDocumentDto } from "src/modules/document/dtos/request/create-document.dto";
@@ -18,14 +16,9 @@ export class DocumentService {
     constructor(
         private prisma: PrismaService,
         @InjectQueue(QueueKey.PREPROCESSING) private queue: Queue,
-        @Inject(rulesConfig.KEY) private rulesCfg: ConfigType<typeof rulesConfig>,
     ) {}
 
-    async canChangeDocument(storyId: number, userId: number, contentLength?: number) {
-        if (contentLength && contentLength > this.rulesCfg.maxCharacterPerDocument) {
-            throw new BadRequestException(`Exceed content character limit of ${this.rulesCfg.maxCharacterPerDocument}`);
-        }
-
+    async canChangeDocument(storyId: number, userId: number) {
         const story = await this.prisma.story.findFirstOrThrow({
             where: { storyId },
         });
@@ -38,7 +31,7 @@ export class DocumentService {
     async create(payload: CreateDocumentDto): Promise<CreateDocumentResponseDto> {
         const { name, content, userId, storyId, categoryId } = payload;
 
-        await this.canChangeDocument(storyId, userId, content.length);
+        await this.canChangeDocument(storyId, userId);
 
         const newDocument = await this.prisma.document.create({
             data: {
@@ -49,7 +42,8 @@ export class DocumentService {
             },
         });
 
-        await this.queue.add(newDocument.documentId.toString(), newDocument);
+        await this.queue.add("preprocessing", newDocument);
+        console.log("proof this is queued");
 
         return mapObject(CreateDocumentResponseDto, newDocument);
     }
@@ -61,7 +55,7 @@ export class DocumentService {
             where: { documentId },
         });
 
-        await this.canChangeDocument(document.storyId, userId, content.length);
+        await this.canChangeDocument(document.storyId, userId);
 
         const updatedDocument = await this.prisma.document.update({
             where: { documentId: document.documentId },

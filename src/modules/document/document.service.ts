@@ -15,7 +15,7 @@ import { UpdateDocumentResponseDto } from "src/modules/document/dtos/response/up
 export class DocumentService {
     constructor(
         private prisma: PrismaService,
-        @InjectQueue(QueueKey.PREPROCESSING) private queue: Queue,
+        @InjectQueue(QueueKey.CHUNKING) private queue: Queue,
     ) {}
 
     async canChangeDocument(storyId: number, userId: number) {

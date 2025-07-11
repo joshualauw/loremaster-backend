@@ -1,3 +1,3 @@
 export enum QueueKey {
-    PREPROCESSING = "preprocessing",
+    CHUNKING = "chunking",
 }

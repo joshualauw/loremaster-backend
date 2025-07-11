@@ -2,7 +2,7 @@ import { PrismaService } from "src/core/database/prisma.service";
 import { Module } from "@nestjs/common";
 import { BullModule } from "@nestjs/bullmq";
 import { ConfigModule, ConfigType } from "@nestjs/config";
-import { PreprocessingConsumer } from "src/modules/queue/queue.processor";
+import { ChunkingProcessor } from "src/modules/queue/chunking.processor";
 import { AiModule } from "src/modules/ai/ai.module";
 import bullmqConfig from "src/config/bullmq.config";
 
@@ -20,7 +20,7 @@ import bullmqConfig from "src/config/bullmq.config";
             inject: [bullmqConfig.KEY],
         }),
     ],
-    providers: [PrismaService, PreprocessingConsumer],
+    providers: [PrismaService, ChunkingProcessor],
     exports: [BullModule],
 })
 export class QueueModule {}

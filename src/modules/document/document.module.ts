@@ -6,7 +6,7 @@ import { DocumentController } from "src/modules/document/document.controller";
 import { DocumentService } from "src/modules/document/document.service";
 
 @Module({
-    imports: [BullModule.registerQueue({ name: QueueKey.PREPROCESSING })],
+    imports: [BullModule.registerQueue({ name: QueueKey.CHUNKING })],
     controllers: [DocumentController],
     providers: [PrismaService, DocumentService],
 })

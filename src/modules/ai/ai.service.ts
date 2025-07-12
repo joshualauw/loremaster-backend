@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-
-const CHUNK_SIZE = 300;
-const CHUNK_OVERLAP = 40;
+import { OpenAIService } from "src/core/llm/openai.service";
 
 @Injectable()
 export class AiService {
+    constructor(private openai: OpenAIService) {}
+
     cleanText(input: string): string {
         return input
             .replace(/[ \t]+/g, " ") // normalize spaces
@@ -18,19 +18,44 @@ export class AiService {
 
     async createChunks(input: string): Promise<string[]> {
         const splitter = new RecursiveCharacterTextSplitter({
-            chunkSize: CHUNK_SIZE,
-            chunkOverlap: CHUNK_OVERLAP,
+            chunkSize: 300,
+            chunkOverlap: 40,
             separators: [". ", "\n\n", "\n", " ", ""],
         });
 
         const output = await splitter.createDocuments([input]);
-        return output.map((doc) => this.cleanChunk(doc.pageContent));
+        return output.map((doc) =>
+            doc.pageContent
+                .replace(/^\.\s*/, "")
+                .replace(/\s+/g, " ")
+                .trim(),
+        );
     }
 
-    cleanChunk(chunk: string): string {
-        return chunk
-            .replace(/^\.\s*/, "")
-            .replace(/\s+/g, " ")
-            .trim();
+    async embedChunks(inputs: string[]): Promise<number[][]> {
+        // const result = await this.openai.client.embeddings.create({
+        //     model: "text-embedding-3-small",
+        //     input: inputs,
+        // });
+
+        // return result.data.map((d) => d.embedding);
+
+        function dummyEmbedding(text: string, dim = 1536): number[] {
+            const vector = new Array(dim).fill(0);
+            let hash = 0;
+
+            for (let i = 0; i < text.length; i++) {
+                hash = (hash * 31 + text.charCodeAt(i)) % 100000;
+            }
+
+            for (let i = 0; i < dim; i++) {
+                const val = Math.sin(hash + i) * 1000;
+                vector[i] = val % 1 || 0;
+            }
+
+            return vector;
+        }
+
+        return inputs.map((d) => dummyEmbedding(d));
     }
 }

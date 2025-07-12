@@ -10,12 +10,13 @@ import { QueueModule } from "src/modules/queue/queue.module";
 import jwtConfig from "src/config/jwt.config";
 import commonConfig from "src/config/common.config";
 import bullmqConfig from "src/config/bullmq.config";
+import openaiConfig from "src/config/openai.config";
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            load: [jwtConfig, commonConfig, bullmqConfig],
+            load: [jwtConfig, commonConfig, bullmqConfig, openaiConfig],
         }),
         QueueModule,
         UserModule,

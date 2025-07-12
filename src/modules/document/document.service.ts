@@ -42,8 +42,7 @@ export class DocumentService {
             },
         });
 
-        await this.queue.add("preprocessing", newDocument);
-        console.log("proof this is queued");
+        await this.queue.add("chunking", newDocument);
 
         return mapObject(CreateDocumentResponseDto, newDocument);
     }

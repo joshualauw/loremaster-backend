@@ -33,14 +33,16 @@ export class AiService {
     }
 
     async embedChunks(inputs: string[]): Promise<number[][]> {
-        // const result = await this.openai.client.embeddings.create({
-        //     model: "text-embedding-3-small",
-        //     input: inputs,
-        // });
+        const result = await this.openai.client.embeddings.create({
+            model: "text-embedding-3-small",
+            input: inputs,
+        });
 
-        // return result.data.map((d) => d.embedding);
+        return result.data.map((d) => d.embedding);
+    }
 
-        function dummyEmbedding(text: string, dim = 1536): number[] {
+    async dummyEmbedChunks(inputs: string[]): Promise<number[][]> {
+        function dummyVector(text: string, dim = 1536): number[] {
             const vector = new Array(dim).fill(0);
             let hash = 0;
 
@@ -56,6 +58,6 @@ export class AiService {
             return vector;
         }
 
-        return inputs.map((d) => dummyEmbedding(d));
+        return inputs.map((d) => dummyVector(d));
     }
 }

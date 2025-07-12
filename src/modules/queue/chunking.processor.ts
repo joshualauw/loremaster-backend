@@ -22,29 +22,42 @@ export class ChunkingProcessor extends WorkerHost {
 
         try {
             await this.prisma.$transaction(async (tx) => {
+                const values: any[] = [];
+                const placeholders: string[] = [];
+
                 for (let i = 0; i < chunks.length; i++) {
-                    await tx.$executeRaw`
-                        INSERT INTO public."DocumentChunk" ("documentId", title, index, content, vector)
-                        VALUES (${job.data.documentId}, ${job.data.name}, ${i}, ${chunks[i]}, ${vectors[i]})
-                    `;
+                    const offset = i * 5;
+                    values.push(job.data.documentId, job.data.name, i, chunks[i], vectors[i]);
+                    placeholders.push(
+                        `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5})`,
+                    );
                 }
+                const query = `
+                    INSERT INTO public."DocumentChunk" ("documentId", title, index, content, vector)
+                    VALUES ${placeholders.join(", ")}
+                `;
+                await tx.$executeRawUnsafe(query, ...values);
+
                 await tx.document.update({
                     where: { documentId: job.data.documentId },
                     data: { jobStatus: "DONE" },
                 });
             });
         } catch (err) {
-            if (err instanceof PrismaClientKnownRequestError) {
-                console.log(err.message);
+            let reason = err.message;
+            console.log(err.message);
 
-                await this.prisma.document.update({
-                    where: { documentId: job.data.documentId },
-                    data: {
-                        jobStatus: "FAILED",
-                        jobReason: `[${err.code}] ${err.message.trim().replace(/\s+/g, " ")}`,
-                    },
-                });
+            if (err instanceof PrismaClientKnownRequestError) {
+                reason = `[${err.code}] ${err.message.trim().replace(/\s+/g, " ")}`;
             }
+
+            await this.prisma.document.update({
+                where: { documentId: job.data.documentId },
+                data: {
+                    jobStatus: "FAILED",
+                    jobReason: reason,
+                },
+            });
         }
     }
 }

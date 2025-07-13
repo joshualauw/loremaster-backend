@@ -11,6 +11,7 @@ import jwtConfig from "src/config/jwt.config";
 import commonConfig from "src/config/common.config";
 import bullmqConfig from "src/config/bullmq.config";
 import openaiConfig from "src/config/openai.config";
+import { SceneModule } from "src/modules/scene/scene.module";
 
 @Module({
     imports: [
@@ -23,6 +24,7 @@ import openaiConfig from "src/config/openai.config";
         AuthModule,
         StoryModule,
         DocumentModule,
+        SceneModule,
     ],
     providers: [
         {

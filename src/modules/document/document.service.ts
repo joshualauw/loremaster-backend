@@ -1,7 +1,7 @@
 import { InjectQueue } from "@nestjs/bullmq";
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { Queue } from "bullmq";
-import { QueueKey } from "src/common/enums/queue.enum";
+import { QueueKey } from "src/modules/queue/enums/queue.enum";
 import { PrismaService } from "src/core/database/prisma.service";
 import { mapObject } from "src/core/utils/mapper";
 import { CreateDocumentDto } from "src/modules/document/dtos/request/create-document.dto";
@@ -10,6 +10,7 @@ import { UpdateDocumentDto } from "src/modules/document/dtos/request/update-docu
 import { CreateDocumentResponseDto } from "src/modules/document/dtos/response/create-document-response.dto";
 import { DeleteDocumentResponseDto } from "src/modules/document/dtos/response/delete-document-response.dto";
 import { UpdateDocumentResponseDto } from "src/modules/document/dtos/response/update-document-response.dto";
+import { ChunkingTaskDto } from "src/modules/queue/dtos/request/chunking-task.dto";
 
 @Injectable()
 export class DocumentService {
@@ -42,7 +43,7 @@ export class DocumentService {
             },
         });
 
-        await this.queue.add("chunking", newDocument);
+        await this.queue.add("chunking", mapObject(ChunkingTaskDto, newDocument));
 
         return mapObject(CreateDocumentResponseDto, newDocument);
     }

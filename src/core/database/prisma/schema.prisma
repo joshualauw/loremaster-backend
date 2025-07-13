@@ -86,19 +86,17 @@ model DocumentChunk {
   documentChunkId Int                         @id @default(autoincrement())
   document        Document                    @relation(fields: [documentId], references: [documentId], onDelete: Cascade)
   documentId      Int
-  title           String                      @db.VarChar(255)
   index           Int
   content         String
   vector          Unsupported("vector(1536)")
 }
 
 model Scene {
-  sceneId     Int       @id @default(autoincrement())
-  story       Story     @relation(fields: [storyId], references: [storyId], onDelete: Cascade)
-  storyId     Int
-  title       String    @db.VarChar(255)
-  description String    @db.Text()
-  jobStatus   JobStatus @default(PENDING)
-  jobReason   String?
-  createdAt   DateTime  @default(now())
+  sceneId   Int       @id @default(autoincrement())
+  story     Story     @relation(fields: [storyId], references: [storyId], onDelete: Cascade)
+  storyId   Int
+  content   String    @db.Text()
+  jobStatus JobStatus @default(PENDING)
+  jobReason String?
+  createdAt DateTime  @default(now())
 }

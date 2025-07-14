@@ -1,5 +1,5 @@
 export interface StoreChunksDto {
     documentId: number;
-    chunks: string[];
+    values: string[];
     vectors: number[][];
 }

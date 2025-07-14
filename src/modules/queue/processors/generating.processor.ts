@@ -3,14 +3,13 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { Job } from "bullmq";
 import { QueueKey } from "src/modules/queue/enums/queue.enum";
 import { PrismaService } from "src/core/database/prisma.service";
-import { AiService } from "src/modules/ai/ai.service";
 import { GeneratingTaskDto } from "src/modules/queue/dtos/request/generating-task.dto";
-import { GeneratingTaskResponseDto } from "src/modules/queue/dtos/response/generating-task-response.dto";
+import { RetrievalService } from "src/modules/ai/services/retrieval.service";
 
 @Processor(QueueKey.GENERATING)
 export class GeneratingProcessor extends WorkerHost {
     constructor(
-        private aiService: AiService,
+        private retrieval: RetrievalService,
         private prisma: PrismaService,
     ) {
         super();
@@ -18,7 +17,7 @@ export class GeneratingProcessor extends WorkerHost {
 
     async process(job: Job<GeneratingTaskDto>) {
         try {
-            const chunks = await this.aiService.searchChunks({
+            const chunks = await this.retrieval.searchChunks({
                 documentIds: job.data.documentIds,
                 query: job.data.description,
             });

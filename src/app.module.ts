@@ -7,17 +7,19 @@ import { UserModule } from "src/modules/user/user.module";
 import { StoryModule } from "src/modules/story/story.module";
 import { DocumentModule } from "src/modules/document/document.module";
 import { QueueModule } from "src/modules/queue/queue.module";
+import { SceneModule } from "src/modules/scene/scene.module";
+
 import jwtConfig from "src/config/jwt.config";
 import commonConfig from "src/config/common.config";
 import bullmqConfig from "src/config/bullmq.config";
 import openaiConfig from "src/config/openai.config";
-import { SceneModule } from "src/modules/scene/scene.module";
+import aiConfig from "src/config/ai.config";
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            load: [jwtConfig, commonConfig, bullmqConfig, openaiConfig],
+            load: [jwtConfig, commonConfig, bullmqConfig, openaiConfig, aiConfig],
         }),
         QueueModule,
         UserModule,

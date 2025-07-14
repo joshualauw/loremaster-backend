@@ -1,15 +1,15 @@
-import { AiService } from "src/modules/ai/ai.service";
 import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { Job } from "bullmq";
 import { QueueKey } from "src/modules/queue/enums/queue.enum";
 import { PrismaService } from "src/core/database/prisma.service";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { ChunkingTaskDto } from "src/modules/queue/dtos/request/chunking-task.dto";
+import { PreprocessingService } from "src/modules/ai/services/preprocessing.service";
 
 @Processor(QueueKey.CHUNKING)
 export class ChunkingProcessor extends WorkerHost {
     constructor(
-        private aiService: AiService,
+        private preprocessing: PreprocessingService,
         private prisma: PrismaService,
     ) {
         super();
@@ -17,14 +17,13 @@ export class ChunkingProcessor extends WorkerHost {
 
     async process(job: Job<ChunkingTaskDto>) {
         try {
-            const cleaned = this.aiService.cleanText(job.data.content);
-            const chunks = await this.aiService.createChunks(cleaned);
-            const vectors = await this.aiService.embedChunks(chunks);
+            const cleaned = this.preprocessing.cleanText(job.data.content);
+            const chunks = await this.preprocessing.createChunks(cleaned);
 
-            await this.aiService.storeChunks({
+            await this.preprocessing.storeChunks({
                 documentId: job.data.documentId,
-                chunks,
-                vectors,
+                values: chunks.values,
+                vectors: chunks.vectors,
             });
 
             await this.prisma.document.update({

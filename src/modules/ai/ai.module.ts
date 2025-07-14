@@ -1,10 +1,12 @@
 import { Module } from "@nestjs/common";
 import { PrismaService } from "src/core/database/prisma.service";
 import { OpenAIService } from "src/core/llm/openai.service";
-import { AiService } from "src/modules/ai/ai.service";
+import { GenerationService } from "src/modules/ai/services/generation.service";
+import { PreprocessingService } from "src/modules/ai/services/preprocessing.service";
+import { RetrievalService } from "src/modules/ai/services/retrieval.service";
 
 @Module({
-    providers: [PrismaService, AiService, OpenAIService],
-    exports: [AiService],
+    providers: [PrismaService, PreprocessingService, RetrievalService, GenerationService, OpenAIService],
+    exports: [PreprocessingService, RetrievalService, GenerationService],
 })
 export class AiModule {}

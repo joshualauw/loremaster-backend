@@ -22,8 +22,6 @@ export class GeneratingProcessor extends WorkerHost {
                 query: job.data.description,
             });
 
-            console.log(chunks);
-
             await this.prisma.scene.update({
                 where: { sceneId: job.data.sceneId },
                 data: { jobStatus: "DONE" },

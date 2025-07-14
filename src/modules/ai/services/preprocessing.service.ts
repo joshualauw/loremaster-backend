@@ -57,9 +57,9 @@ export class PreprocessingService {
         }
 
         const query = `
-                INSERT INTO public."DocumentChunk" ("documentId", index, content, vector)
-                VALUES ${placeholders.join(", ")}
-            `;
+            INSERT INTO public."DocumentChunk" ("documentId", index, content, vector)
+            VALUES ${placeholders.join(", ")}
+        `;
 
         await this.prisma.$transaction(async (tx) => {
             await tx.$executeRawUnsafe(query, ...tempValues);

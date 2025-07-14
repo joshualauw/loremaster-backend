@@ -5,6 +5,8 @@ import { OpenAIService } from "src/core/llm/openai.service";
 import { SearchChunksDto } from "src/modules/ai/dtos/request/search-chunks.dto";
 import { SearchChunksResponseDto } from "src/modules/ai/dtos/response/search-chunks-response.dto";
 import aiConfig from "src/config/ai.config";
+import { VectorSearchDto } from "src/modules/ai/dtos/request/vector-search.dto";
+import { FullTextSearchDto } from "src/modules/ai/dtos/request/full-text-search.dto";
 
 @Injectable()
 export class RetrievalService {
@@ -21,24 +23,67 @@ export class RetrievalService {
         const vector = vectors[0];
         const vectorString = `[${vector.join(",")}]`;
 
-        const distanceThreshold = this.aiCfg.vectorSearchDistanceThreshold;
         //logarithmic growth
-        const maxChunksRetreived = Math.ceil(
+        const totalChunks = Math.ceil(
             this.aiCfg.vectorSearchBasechunks + Math.log2(documentIds.length) * this.aiCfg.vectorSearchGrowthFactor,
         );
-        const topNResult = Math.min(maxChunksRetreived, this.aiCfg.vectorSearchMaximumChunks);
+        const maxChunks = Math.min(totalChunks, this.aiCfg.vectorSearchMaximumChunks);
+        const vectorSearchLimit = Math.round(maxChunks * this.aiCfg.vectorSearchChunkWeight);
+        const fullTextSearchLimit = Math.round(maxChunks * this.aiCfg.fullTextSearchChunkWeight);
 
-        const result = (await this.prisma.$queryRaw`
-                SELECT "documentChunkId", content, index, vector <=> ${vectorString}::vector AS distance 
-                FROM public."DocumentChunk"
-                WHERE "documentId" = ANY(${documentIds}::int[]) 
-                AND vector <=> ${vectorString}::vector < ${distanceThreshold}
-                ORDER BY distance
-                LIMIT ${topNResult}
-            `) as SearchChunksResponseDto[];
+        const vectorResult = await this.vectorSearch({
+            vectorString,
+            documentIds,
+            distanceThreshold: this.aiCfg.vectorSearchDistanceThreshold,
+            limit: vectorSearchLimit,
+        });
+        const fullTextResult = await this.fullTextSearch({
+            query,
+            documentIds,
+            scoreThreshold: this.aiCfg.fullTextSearrchScoreThreshold,
+            limit: fullTextSearchLimit,
+        });
 
-        return result;
+        console.log("vector", vectorResult);
+        console.log("fts", fullTextResult);
+
+        //deduping
+        //reranking
+
+        return [...vectorResult, ...fullTextResult];
     }
 
+    async fullTextSearch(params: FullTextSearchDto): Promise<SearchChunksResponseDto[]> {
+        const { query, documentIds, scoreThreshold, limit } = params;
+
+        return await this.prisma.$queryRaw`
+            WITH RankedChunks AS (
+                SELECT "documentChunkId", content, index,
+                ts_rank(to_tsvector('english', content), plainto_tsquery(${query})) AS textScore
+                FROM public."DocumentChunk"
+                WHERE "documentId" = ANY(${documentIds}::int[])
+                AND to_tsvector('english', content) @@ plainto_tsquery(${query})
+            )
+            SELECT "documentChunkId", content, index, textScore
+            FROM RankedChunks
+            WHERE textScore >= ${scoreThreshold}
+            ORDER BY textScore DESC
+            LIMIT ${limit}
+        `;
+    }
+
+    async vectorSearch(params: VectorSearchDto): Promise<SearchChunksResponseDto[]> {
+        const { vectorString, documentIds, distanceThreshold, limit } = params;
+
+        return await this.prisma.$queryRaw`
+            SELECT "documentChunkId", content, index, vector <=> ${vectorString}::vector AS distance 
+            FROM public."DocumentChunk"
+            WHERE "documentId" = ANY(${documentIds}::int[]) 
+            AND vector <=> ${vectorString}::vector < ${distanceThreshold}
+            ORDER BY distance
+            LIMIT ${limit}
+        `;
+    }
+    //using normalization
     async rerankingChunks() {}
 }

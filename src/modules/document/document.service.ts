@@ -30,7 +30,7 @@ export class DocumentService {
     }
 
     async create(payload: CreateDocumentDto): Promise<CreateDocumentResponseDto> {
-        const { name, content, userId, storyId, categoryId } = payload;
+        const { name, fields, userId, storyId, categoryId } = payload;
 
         await this.canChangeDocument(storyId, userId);
 
@@ -38,18 +38,18 @@ export class DocumentService {
             data: {
                 storyId,
                 categoryId,
+                originalData: fields,
                 name,
-                content,
             },
         });
 
-        await this.queue.add("chunking", mapObject(ChunkingTaskDto, newDocument));
+        await this.queue.add("chunking", mapObject(ChunkingTaskDto, { documentId: newDocument.documentId }));
 
         return mapObject(CreateDocumentResponseDto, newDocument);
     }
 
     async update(payload: UpdateDocumentDto): Promise<UpdateDocumentResponseDto> {
-        const { name, content, userId, categoryId, documentId } = payload;
+        const { name, fields, userId, categoryId, documentId } = payload;
 
         const document = await this.prisma.document.findFirstOrThrow({
             where: { documentId },
@@ -61,8 +61,8 @@ export class DocumentService {
             where: { documentId: document.documentId },
             data: {
                 name,
-                content,
                 categoryId,
+                originalData: fields,
                 jobStatus: "PENDING",
             },
         });

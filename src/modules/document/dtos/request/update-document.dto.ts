@@ -1,13 +1,16 @@
-import { IsNotEmpty, IsNumber, IsString, MaxLength } from "class-validator";
+import { IsArray, IsNotEmpty, IsNumber, IsString, MaxLength } from "class-validator";
 
 export class UpdateDocumentBody {
     @IsString()
     @IsNotEmpty()
     name: string;
 
-    @IsString()
+    @IsArray()
     @IsNotEmpty()
-    content: string;
+    fields: {
+        label: string;
+        content: string;
+    }[];
 
     @IsNumber()
     @IsNotEmpty()

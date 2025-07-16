@@ -17,7 +17,11 @@ export class ChunkingProcessor extends WorkerHost {
 
     async process(job: Job<ChunkingTaskDto>) {
         try {
-            const cleaned = this.preprocessing.cleanText(job.data.content);
+            const document = await this.prisma.document.findFirstOrThrow({
+                where: { documentId: job.data.documentId },
+            });
+
+            const cleaned = this.preprocessing.cleanText(document.originalData);
             const chunks = await this.preprocessing.createChunks(cleaned);
 
             await this.preprocessing.storeChunks({
@@ -35,7 +39,11 @@ export class ChunkingProcessor extends WorkerHost {
             console.log(err.message);
 
             if (err instanceof PrismaClientKnownRequestError) {
-                reason = `[${err.code}] ${err.message.trim().replace(/\s+/g, " ")}`;
+                if (err.code == "P2025") {
+                    reason = `[${err.code}] Document not found`;
+                } else {
+                    reason = `[${err.code}] ${err.message.trim().replace(/\s+/g, " ")}`;
+                }
             }
 
             await this.prisma.document.update({

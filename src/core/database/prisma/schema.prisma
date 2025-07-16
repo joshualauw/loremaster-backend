@@ -2,6 +2,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator json {
+  provider = "prisma-json-types-generator"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -74,7 +78,8 @@ model Document {
   category      Category        @relation(fields: [categoryId], references: [categoryId])
   categoryId    Int
   name          String          @db.VarChar(255)
-  content       String          @db.Text()
+  /// [OriginalData]
+  originalData  Json            @default("[]")
   jobStatus     JobStatus       @default(PENDING)
   jobReason     String?
   DocumentChunk DocumentChunk[]

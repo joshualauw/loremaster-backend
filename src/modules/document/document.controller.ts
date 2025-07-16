@@ -3,6 +3,7 @@ import { apiResponse } from "src/core/utils/apiResponse";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { DocumentService } from "src/modules/document/document.service";
 import { CreateDocumentBody } from "src/modules/document/dtos/request/create-document.dto";
+import { UpdateDocumentBody } from "src/modules/document/dtos/request/update-document.dto";
 import { UserJwtPayload } from "src/types/UserJwtPayload";
 
 @Controller("document")
@@ -23,7 +24,7 @@ export class DocumentController {
     async update(
         @Param("documentId") documentId: number,
         @CurrentUser() user: UserJwtPayload,
-        @Body() body: CreateDocumentBody,
+        @Body() body: UpdateDocumentBody,
     ) {
         const res = await this.documentService.update({ ...body, userId: user.id, documentId });
         return apiResponse("document updated", res);

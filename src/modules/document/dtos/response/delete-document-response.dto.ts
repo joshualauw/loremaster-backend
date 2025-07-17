@@ -1,6 +1,3 @@
-import { Expose } from "class-transformer";
+import { Document } from "@prisma/client";
 
-export class DeleteDocumentResponseDto {
-    @Expose()
-    documentId: number;
-}
+export interface DeleteDocumentResponseDto extends Pick<Document, "documentId"> {}

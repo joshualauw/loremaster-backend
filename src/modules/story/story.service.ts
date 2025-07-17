@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Injectable } from "@nestjs/common";
 import { CreateStoryDto } from "./dtos/request/create-story.dto";
 import { PrismaService } from "src/core/database/prisma.service";
 import { CreateStoryResponseDto } from "src/modules/story/dtos/response/create-story-response.dto";
@@ -6,19 +6,20 @@ import { UpdateStoryDto } from "src/modules/story/dtos/request/update-story.dto"
 import { UpdateStoryResponseDto } from "src/modules/story/dtos/response/update-story-response.dto";
 import { DeleteStoryDto } from "src/modules/story/dtos/request/delete-story.dto";
 import { DeleteStoryResponseDto } from "src/modules/story/dtos/response/delete-story-response.dto";
-import { FindAllByUserDto } from "src/modules/story/dtos/response/find-all-by-user.dto";
-import { mapObject } from "src/core/utils/mapper";
+import { omit, pick } from "src/core/utils/mapper";
 
 @Injectable()
 export class StoryService {
     constructor(private prisma: PrismaService) {}
 
-    async findAllByUser(userId: number): Promise<FindAllByUserDto[]> {
-        const stories = await this.prisma.story.findMany({
-            where: { userId },
+    async canChangeStory(storyId: number, userId: number) {
+        const story = await this.prisma.story.findFirstOrThrow({
+            where: { storyId },
         });
 
-        return stories.map((s) => mapObject(FindAllByUserDto, s));
+        if (story.userId != userId) {
+            throw new ForbiddenException("User doesn't have permission to access story");
+        }
     }
 
     async create(payload: CreateStoryDto): Promise<CreateStoryResponseDto> {
@@ -32,17 +33,7 @@ export class StoryService {
             },
         });
 
-        return mapObject(CreateStoryResponseDto, newStory);
-    }
-
-    async canChangeStory(storyId: number, userId: number) {
-        const story = await this.prisma.story.findFirstOrThrow({
-            where: { storyId },
-        });
-
-        if (story.userId != userId) {
-            throw new ForbiddenException("User doesn't have permission to access story");
-        }
+        return omit(newStory, "updatedAt", "logoUrl");
     }
 
     async update(payload: UpdateStoryDto): Promise<UpdateStoryResponseDto> {
@@ -58,7 +49,7 @@ export class StoryService {
             },
         });
 
-        return mapObject(UpdateStoryResponseDto, updatedStory);
+        return omit(updatedStory, "createdAt", "logoUrl");
     }
 
     async delete(payload: DeleteStoryDto): Promise<DeleteStoryResponseDto> {
@@ -70,6 +61,6 @@ export class StoryService {
             where: { storyId },
         });
 
-        return mapObject(DeleteStoryResponseDto, deletedStory);
+        return pick(deletedStory, "storyId");
     }
 }

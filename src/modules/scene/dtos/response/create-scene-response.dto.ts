@@ -1,12 +1,3 @@
-import { Expose } from "class-transformer";
+import { Scene } from "@prisma/client";
 
-export class CreateSceneResponseDto {
-    @Expose()
-    sceneId: number;
-
-    @Expose()
-    createdAt: Date;
-
-    @Expose()
-    jobStatus: string;
-}
+export interface CreateSceneResponseDto extends Pick<Scene, "sceneId" | "createdAt" | "jobStatus"> {}

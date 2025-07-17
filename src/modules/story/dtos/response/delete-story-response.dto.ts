@@ -1,6 +1,3 @@
-import { Expose } from "class-transformer";
+import { Story } from "@prisma/client";
 
-export class DeleteStoryResponseDto {
-    @Expose()
-    storyId: number;
-}
+export interface DeleteStoryResponseDto extends Pick<Story, "storyId"> {}

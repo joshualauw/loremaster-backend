@@ -1,15 +1,3 @@
-import { Expose } from "class-transformer";
+import { Document } from "@prisma/client";
 
-export class CreateDocumentResponseDto {
-    @Expose()
-    documentId: number;
-
-    @Expose()
-    name: string;
-
-    @Expose()
-    createdAt: Date;
-
-    @Expose()
-    jobStatus: string;
-}
+export interface CreateDocumentResponseDto extends Pick<Document, "documentId" | "name" | "createdAt" | "jobStatus"> {}

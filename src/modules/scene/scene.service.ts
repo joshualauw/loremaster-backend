@@ -3,10 +3,10 @@ import { ForbiddenException, Injectable } from "@nestjs/common";
 import { Queue } from "bullmq";
 import { QueueKey } from "src/modules/queue/enums/queue.enum";
 import { PrismaService } from "src/core/database/prisma.service";
-import { mapObject } from "src/core/utils/mapper";
 import { GeneratingTaskDto } from "src/modules/queue/dtos/request/generating-task.dto";
 import { CreateSceneDto } from "src/modules/scene/dtos/request/create-scene.dto";
 import { CreateSceneResponseDto } from "src/modules/scene/dtos/response/create-scene-response.dto";
+import { pick } from "src/core/utils/mapper";
 
 @Injectable()
 export class SceneService {
@@ -38,16 +38,13 @@ export class SceneService {
             },
         });
 
-        await this.queue.add(
-            "generating",
-            mapObject(GeneratingTaskDto, {
-                sceneId: newScene.sceneId,
-                tone,
-                description,
-                documentIds,
-            }),
-        );
+        await this.queue.add("generating", {
+            sceneId: newScene.sceneId,
+            tone,
+            description,
+            documentIds,
+        } as GeneratingTaskDto);
 
-        return mapObject(CreateSceneResponseDto, newScene);
+        return pick(newScene, "sceneId", "jobStatus", "createdAt");
     }
 }

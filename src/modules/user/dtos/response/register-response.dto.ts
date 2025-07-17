@@ -1,24 +1,6 @@
-import { Expose, Type } from "class-transformer";
+import { User } from "@prisma/client";
 
-class UserDto {
-    @Expose()
-    userId: number;
-
-    @Expose()
-    email: string;
-
-    @Expose()
-    username: string;
-
-    @Expose()
-    createdAt: Date;
-}
-
-export class RegisterResponseDto {
-    @Expose()
-    @Type(() => UserDto)
-    user: UserDto;
-
-    @Expose()
+export interface RegisterResponseDto {
+    user: Pick<User, "userId" | "email" | "username" | "createdAt">;
     token: string;
 }

@@ -3,7 +3,6 @@ import { ForbiddenException, Injectable } from "@nestjs/common";
 import { Queue } from "bullmq";
 import { QueueKey } from "src/modules/queue/enums/queue.enum";
 import { PrismaService } from "src/core/database/prisma.service";
-import { mapObject } from "src/core/utils/mapper";
 import { CreateDocumentDto } from "src/modules/document/dtos/request/create-document.dto";
 import { DeleteDocumentDto } from "src/modules/document/dtos/request/delete-document.dto";
 import { UpdateDocumentDto } from "src/modules/document/dtos/request/update-document.dto";
@@ -11,6 +10,7 @@ import { CreateDocumentResponseDto } from "src/modules/document/dtos/response/cr
 import { DeleteDocumentResponseDto } from "src/modules/document/dtos/response/delete-document-response.dto";
 import { UpdateDocumentResponseDto } from "src/modules/document/dtos/response/update-document-response.dto";
 import { ChunkingTaskDto } from "src/modules/queue/dtos/request/chunking-task.dto";
+import { pick } from "src/core/utils/mapper";
 
 @Injectable()
 export class DocumentService {
@@ -43,9 +43,9 @@ export class DocumentService {
             },
         });
 
-        await this.queue.add("chunking", mapObject(ChunkingTaskDto, { documentId: newDocument.documentId }));
+        await this.queue.add("chunking", { documentId: newDocument.documentId } as ChunkingTaskDto);
 
-        return mapObject(CreateDocumentResponseDto, newDocument);
+        return pick(newDocument, "documentId", "name", "createdAt", "jobStatus");
     }
 
     async update(payload: UpdateDocumentDto): Promise<UpdateDocumentResponseDto> {
@@ -67,7 +67,7 @@ export class DocumentService {
             },
         });
 
-        return mapObject(UpdateDocumentResponseDto, updatedDocument);
+        return pick(updatedDocument, "documentId", "name", "updatedAt", "jobStatus");
     }
 
     async delete(payload: DeleteDocumentDto): Promise<DeleteDocumentResponseDto> {
@@ -83,6 +83,6 @@ export class DocumentService {
             where: { documentId },
         });
 
-        return mapObject(DeleteDocumentResponseDto, deletedDocument);
+        return pick(deletedDocument, "documentId");
     }
 }

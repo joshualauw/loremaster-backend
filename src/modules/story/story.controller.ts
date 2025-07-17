@@ -10,12 +10,6 @@ import { UpdateStoryBody } from "src/modules/story/dtos/request/update-story.dto
 export class StoryController {
     constructor(private readonly storyService: StoryService) {}
 
-    @Get()
-    async findAllByUser(@CurrentUser() user: UserJwtPayload) {
-        const res = await this.storyService.findAllByUser(user.id);
-        return apiResponse("story fetched", res);
-    }
-
     @Post()
     @HttpCode(HttpStatus.CREATED)
     async create(@CurrentUser() user: UserJwtPayload, @Body() body: CreateStoryBody) {

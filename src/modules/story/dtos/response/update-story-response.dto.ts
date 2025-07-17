@@ -1,18 +1,3 @@
-import { Expose } from "class-transformer";
+import { Story } from "@prisma/client";
 
-export class UpdateStoryResponseDto {
-    @Expose()
-    storyId: number;
-
-    @Expose()
-    userId: number;
-
-    @Expose()
-    title: string;
-
-    @Expose()
-    description: string;
-
-    @Expose()
-    updatedAt: Date;
-}
+export interface UpdateStoryResponseDto extends Omit<Story, "logoUrl" | "createdAt"> {}

@@ -1,11 +1,11 @@
-import { Injectable, ConflictException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "src/core/database/prisma.service";
 import { RegisterDto } from "src/modules/user/dtos/request/register.dto";
 import { RegisterResponseDto } from "src/modules/user/dtos/response/register-response.dto";
 import { AuthService } from "src/modules/auth/auth.service";
 import { LoginDto } from "src/modules/user/dtos/request/login.dto";
 import { LoginResponseDto } from "src/modules/user/dtos/response/login-response.dto";
-import { mapObject } from "src/core/utils/mapper";
+import { pick } from "src/core/utils/mapper";
 
 @Injectable()
 export class UserService {
@@ -39,7 +39,10 @@ export class UserService {
             username: newUser.username,
         });
 
-        return mapObject(RegisterResponseDto, { token, user: newUser });
+        return {
+            token,
+            user: pick(newUser, "userId", "email", "username", "createdAt"),
+        };
     }
 
     async login(payload: LoginDto): Promise<LoginResponseDto> {
@@ -63,6 +66,9 @@ export class UserService {
             username: user.username,
         });
 
-        return mapObject(LoginResponseDto, { token, user });
+        return {
+            token,
+            user: pick(user, "userId", "email", "username"),
+        };
     }
 }

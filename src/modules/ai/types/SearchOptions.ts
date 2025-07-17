@@ -1,6 +1,6 @@
-export interface FullTextSearchDto {
+export interface SearchOptions {
     query: string;
-    scoreThreshold: number;
+    threshold: number;
     documentIds: number[];
     limit: number;
 }

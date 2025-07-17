@@ -5,6 +5,12 @@ export class CreateSceneBody {
     documentIds: number[];
 
     @IsString()
+    locationDetail: string;
+
+    @IsString()
+    objective: string;
+
+    @IsString()
     @IsNotEmpty()
     tone: string;
 

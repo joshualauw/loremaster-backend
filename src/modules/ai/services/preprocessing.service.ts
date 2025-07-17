@@ -24,6 +24,12 @@ export class PreprocessingService {
                 .replace(/\n{3,}/g, "\n\n") // max 2 newlines (preserve paragraph)
                 .replace(/\.{2,}/g, ".") // remove extra dots
                 .replace(/[^\x00-\x7F]+/g, "") // optional: remove non-ASCII
+                .replace(/[*_]{1,2}([^*_]+)[*_]{1,2}/g, "$1") // remove **bold**, *italic*, etc
+                .replace(/`{1,3}([^`]+)`{1,3}/g, "$1") // remove inline or fenced code
+                .replace(/^#+\s?/gm, "") // strip markdown headers
+                .replace(/^\s*[-*+]\s+/gm, "") // strip list markers
+                .replace(/<[^>]+>/g, "") // strip all HTML tags
+                .replace(/[-_*]{3,}/g, "") // strip ASCII dividers
                 .trim(),
         }));
     }

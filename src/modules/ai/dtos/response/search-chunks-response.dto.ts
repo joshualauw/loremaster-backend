@@ -1,6 +1,6 @@
+import { ChunkResultItem } from "src/modules/ai/dtos/common/ChunkResultItem";
+
 export interface SearchChunksResponseDto {
-    documentChunkId: number;
-    content: string;
-    index: number;
-    score: number;
+    vectorResult: ChunkResultItem[];
+    fullTextResult: ChunkResultItem[];
 }

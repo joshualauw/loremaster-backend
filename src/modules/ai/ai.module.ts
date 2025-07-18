@@ -15,6 +15,6 @@ import { RetrievalService } from "src/modules/ai/services/retrieval.service";
         GenerationService,
         OpenAIService,
     ],
-    exports: [PreprocessingService, RetrievalService, GenerationService],
+    exports: [PreprocessingService, RetrievalService, GenerationService, RerankingService],
 })
 export class AiModule {}

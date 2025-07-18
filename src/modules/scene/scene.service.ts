@@ -26,7 +26,7 @@ export class SceneService {
     }
 
     async create(payload: CreateSceneDto): Promise<CreateSceneResponseDto> {
-        const { storyId, userId, tone, description, documentIds } = payload;
+        const { storyId, userId, tone, description, atmosphere, conflict, documentIds } = payload;
 
         this.canChangeScene(storyId, userId);
 
@@ -42,6 +42,8 @@ export class SceneService {
             sceneId: newScene.sceneId,
             tone,
             description,
+            atmosphere,
+            conflict,
             documentIds,
         } as GeneratingTaskDto);
 

@@ -1,18 +1,17 @@
-import { IsNotEmpty, IsArray, IsString } from "class-validator";
+import { IsNotEmpty, IsArray, IsString, IsOptional } from "class-validator";
 
 export class CreateSceneBody {
     @IsArray()
     documentIds: number[];
 
     @IsString()
-    locationDetail: string;
-
-    @IsString()
-    objective: string;
-
-    @IsString()
-    @IsNotEmpty()
     tone: string;
+
+    @IsString()
+    atmosphere: string;
+
+    @IsString()
+    conflict: string;
 
     @IsString()
     @IsNotEmpty()

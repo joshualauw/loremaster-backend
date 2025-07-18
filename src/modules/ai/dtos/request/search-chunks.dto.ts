@@ -1,4 +1,5 @@
 export interface SearchChunksDto {
     documentIds: number[];
-    query: string;
+    vectorQuery: string;
+    fulltextQuery: string;
 }

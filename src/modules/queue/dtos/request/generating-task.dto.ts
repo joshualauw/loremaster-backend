@@ -3,4 +3,6 @@ export interface GeneratingTaskDto {
     documentIds: number[];
     tone: string;
     description: string;
+    atmosphere: string;
+    conflict: string;
 }

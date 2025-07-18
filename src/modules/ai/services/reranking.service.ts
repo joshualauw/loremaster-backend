@@ -1,15 +1,15 @@
+import { NormalizeChunksResponseDto } from "src/modules/ai/dtos/response/normalize-chunks-response.dto";
 import { Inject, Injectable } from "@nestjs/common";
 import { ConfigType } from "@nestjs/config";
 import aiConfig from "src/config/ai.config";
+import { ChunkResultItem } from "src/modules/ai/dtos/common/ChunkResultItem";
 import { NormalizeChunksDto } from "src/modules/ai/dtos/request/normalize-chunks.dto";
-import { NormalizeChunksResponseDto } from "src/modules/ai/dtos/response/normalize-chunks-response.dto";
-import { SearchChunksResponseDto } from "src/modules/ai/dtos/response/search-chunks-response.dto";
 
 @Injectable()
 export class RerankingService {
     constructor(@Inject(aiConfig.KEY) private aiCfg: ConfigType<typeof aiConfig>) {}
 
-    private minMaxNormalize(scores: number[]): number[] {
+    private minMaxNormalize(scores: number[], invert: boolean = false): number[] {
         if (scores.length === 0) return [];
 
         const min = Math.min(...scores);
@@ -18,7 +18,11 @@ export class RerankingService {
         if (max === min) {
             return scores.map(() => 1.0);
         }
-        return scores.map((score) => (score - min) / (max - min));
+
+        return scores.map((score) => {
+            const normalized = (score - min) / (max - min);
+            return invert ? 1 - normalized : normalized;
+        });
     }
 
     combineSearchResults(
@@ -26,13 +30,13 @@ export class RerankingService {
         vectorResults: NormalizeChunksDto,
     ): NormalizeChunksResponseDto {
         const fullTextScores = fullTextResults.map((r) => r.score);
-        const normalizedFullTextScores = this.minMaxNormalize(fullTextScores);
-
         const vectorScores = vectorResults.map((r) => r.score);
-        const normalizedVectorScores = this.minMaxNormalize(vectorScores);
 
-        const fullTextMap = new Map<string, SearchChunksResponseDto>();
-        const vectorMap = new Map<string, SearchChunksResponseDto>();
+        const normalizedFullTextScores = this.minMaxNormalize(fullTextScores);
+        const normalizedVectorScores = this.minMaxNormalize(vectorScores, true);
+
+        const fullTextMap = new Map<string, ChunkResultItem>();
+        const vectorMap = new Map<string, ChunkResultItem>();
 
         fullTextResults.forEach((result, index) => {
             fullTextMap.set(result.documentChunkId.toString(), { ...result, score: normalizedFullTextScores[index] });

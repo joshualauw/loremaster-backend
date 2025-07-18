@@ -1,3 +1,3 @@
-import { SearchChunksResponseDto } from "src/modules/ai/dtos/response/search-chunks-response.dto";
+import { ChunkResultItem } from "src/modules/ai/dtos/common/ChunkResultItem";
 
-export type NormalizeChunksResponseDto = SearchChunksResponseDto[];
+export type NormalizeChunksResponseDto = ChunkResultItem[];

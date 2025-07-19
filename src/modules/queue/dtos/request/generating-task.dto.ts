@@ -1,8 +1,8 @@
+import { SceneMaterials } from "src/modules/ai/dtos/common/SceneMaterials";
+import { SceneOptions } from "src/modules/ai/dtos/common/SceneOptions";
+
 export interface GeneratingTaskDto {
     sceneId: number;
-    documentIds: number[];
-    tone: string;
-    description: string;
-    atmosphere: string;
-    conflict: string;
+    options: SceneOptions;
+    materials: SceneMaterials;
 }

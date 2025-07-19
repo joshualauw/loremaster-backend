@@ -32,4 +32,13 @@ export class OpenAIService {
 
         return result.output_parsed as T;
     }
+
+    async getResponse(prompt: string) {
+        const result = await this.client.responses.create({
+            model: this.openaiCfg.reasoningModel,
+            input: prompt,
+        });
+
+        return result.output_text;
+    }
 }

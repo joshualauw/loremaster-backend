@@ -31,20 +31,37 @@ export class RetrievalService {
         const vector = vectors[0];
         const vectorString = `[${vector.join(",")}]`;
 
-        const vectorResult = await this.vectorSearch({
-            query: vectorString,
-            documentIds,
-            threshold: this.aiCfg.vectorSearchThreshold,
-            limit: totalChunks,
-        });
-        const fullTextResult = await this.fullTextSearch({
-            query: fulltextFriendlyQuery,
-            documentIds,
-            threshold: this.aiCfg.fullTextSearchThreshold,
-            limit: totalChunks,
-        });
+        const [vectorResult, fullTextResult] = await Promise.all([
+            this.vectorSearch({
+                query: vectorString,
+                documentIds,
+                threshold: this.aiCfg.vectorSearchThreshold,
+                limit: totalChunks,
+            }),
+            this.fullTextSearch({
+                query: fulltextFriendlyQuery,
+                documentIds,
+                threshold: this.aiCfg.fullTextSearchThreshold,
+                limit: totalChunks,
+            }),
+        ]);
 
         return this.reranking.combineSearchResults(fullTextResult, vectorResult);
+    }
+
+    //logarithmic growth
+    getMaxChunks(documentLength: number) {
+        const chunkCount = Math.ceil(
+            this.aiCfg.vectorSearchBasechunks + Math.log2(documentLength) * this.aiCfg.vectorSearchGrowthFactor,
+        );
+        return Math.min(chunkCount, this.aiCfg.vectorSearchMaximumChunks);
+    }
+
+    async queryExpansion(query: string) {
+        return this.openai.getStructuredResponse<QueryExpansion>(
+            queryExpansionPrompt(query),
+            zodTextFormat(queryExpansionSchema, "query_expansion"),
+        );
     }
 
     async fullTextSearch(options: SearchOptions): Promise<ChunkResultItem[]> {
@@ -77,20 +94,5 @@ export class RetrievalService {
             ORDER BY score
             LIMIT ${limit}
         `;
-    }
-
-    //logarithmic growth
-    getMaxChunks(documentLength: number) {
-        const chunkCount = Math.ceil(
-            this.aiCfg.vectorSearchBasechunks + Math.log2(documentLength) * this.aiCfg.vectorSearchGrowthFactor,
-        );
-        return Math.min(chunkCount, this.aiCfg.vectorSearchMaximumChunks);
-    }
-
-    async queryExpansion(query: string) {
-        return this.openai.getStructuredResponse<QueryExpansion>(
-            queryExpansionPrompt(query),
-            zodTextFormat(queryExpansionSchema, "query_expansion"),
-        );
     }
 }

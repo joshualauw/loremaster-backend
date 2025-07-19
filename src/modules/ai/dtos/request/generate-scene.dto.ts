@@ -1,7 +1,7 @@
-import { SearchChunksResponseDto } from "src/modules/ai/dtos/response/search-chunks-response.dto";
+import { ChunkResultItem } from "src/modules/ai/dtos/common/ChunkResultItem";
+import { SceneOptions } from "src/modules/ai/dtos/common/SceneOptions";
 
 export interface GenerateSceneDto {
-    chunks: SearchChunksResponseDto[];
-    tone: string;
-    description: string;
+    chunks: ChunkResultItem[];
+    options: SceneOptions;
 }

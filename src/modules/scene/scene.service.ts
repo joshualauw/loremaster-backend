@@ -26,7 +26,7 @@ export class SceneService {
     }
 
     async create(payload: CreateSceneDto): Promise<CreateSceneResponseDto> {
-        const { storyId, userId, tone, description, atmosphere, conflict, documentIds } = payload;
+        const { storyId, userId, options, materials } = payload;
 
         this.canChangeScene(storyId, userId);
 
@@ -40,11 +40,8 @@ export class SceneService {
 
         await this.queue.add("generating", {
             sceneId: newScene.sceneId,
-            tone,
-            description,
-            atmosphere,
-            conflict,
-            documentIds,
+            options,
+            materials,
         } as GeneratingTaskDto);
 
         return pick(newScene, "sceneId", "jobStatus", "createdAt");

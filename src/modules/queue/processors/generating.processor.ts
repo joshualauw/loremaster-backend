@@ -6,6 +6,7 @@ import { PrismaService } from "src/core/database/prisma.service";
 import { GeneratingTaskDto } from "src/modules/queue/dtos/request/generating-task.dto";
 import { RetrievalService } from "src/modules/ai/services/retrieval.service";
 import { RerankingService } from "src/modules/ai/services/reranking.service";
+import { OpenAIService } from "src/core/llm/openai.service";
 
 @Processor(QueueKey.GENERATING)
 export class GeneratingProcessor extends WorkerHost {
@@ -13,6 +14,7 @@ export class GeneratingProcessor extends WorkerHost {
         private retrieval: RetrievalService,
         private prisma: PrismaService,
         private reranking: RerankingService,
+        private openai: OpenAIService,
     ) {
         super();
     }
@@ -22,18 +24,12 @@ export class GeneratingProcessor extends WorkerHost {
             const { sceneId, tone, description, atmosphere, conflict, documentIds } = job.data;
 
             const keys = [tone, description, atmosphere, conflict];
-            const query = keys.map((key) => `${key}: ${job.data[key]}`).join(", ");
-
-            const expandedQuery = await this.retrieval.queryExpansion(query);
+            const rawQuery = keys.map((key) => `${key}: ${job.data[key]}`).join(", ");
 
             const chunks = await this.retrieval.searchChunks({
                 documentIds,
-                vectorQuery: expandedQuery.vectorFriendlyQuery,
-                fulltextQuery: expandedQuery.fulltextFriendlyQuery,
+                rawQuery,
             });
-
-            const topChunks = this.reranking.combineSearchResults(chunks.fullTextResult, chunks.vectorResult);
-            console.log("topChunks", topChunks);
 
             await this.prisma.scene.update({
                 where: { sceneId },

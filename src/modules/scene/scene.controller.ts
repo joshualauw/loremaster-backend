@@ -7,7 +7,7 @@ import { SceneService } from "src/modules/scene/scene.service";
 import { ApiResponse } from "src/types/ApiResponse";
 import { UserJwtPayload } from "src/types/UserJwtPayload";
 
-@Controller("scene")
+@Controller("api/scene")
 export class SceneController {
     constructor(private sceneService: SceneService) {}
 

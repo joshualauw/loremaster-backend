@@ -10,7 +10,7 @@ import { CreateStoryResponseDto } from "src/modules/story/dtos/response/create-s
 import { UpdateStoryResponseDto } from "src/modules/story/dtos/response/update-story-response.dto";
 import { DeleteStoryResponseDto } from "src/modules/story/dtos/response/delete-story-response.dto";
 
-@Controller("story")
+@Controller("api/story")
 export class StoryController {
     constructor(private readonly storyService: StoryService) {}
 

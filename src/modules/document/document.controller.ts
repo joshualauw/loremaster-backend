@@ -10,7 +10,7 @@ import { UpdateDocumentResponseDto } from "src/modules/document/dtos/response/up
 import { ApiResponse } from "src/types/ApiResponse";
 import { UserJwtPayload } from "src/types/UserJwtPayload";
 
-@Controller("document")
+@Controller("api/document")
 export class DocumentController {
     constructor(private readonly documentService: DocumentService) {}
 

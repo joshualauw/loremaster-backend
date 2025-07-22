@@ -5,7 +5,6 @@ import { RegisterResponseDto } from "src/modules/user/dtos/response/register-res
 import { AuthService } from "src/modules/auth/auth.service";
 import { LoginDto } from "src/modules/user/dtos/request/login.dto";
 import { LoginResponseDto } from "src/modules/user/dtos/response/login-response.dto";
-import { pick } from "src/core/utils/mapper";
 import { GoogleLoginDto } from "src/modules/user/dtos/request/google-login.dto";
 import { GoogleLoginResponseDto } from "src/modules/user/dtos/response/google-login-response.dto";
 
@@ -41,10 +40,7 @@ export class UserService {
             username: newUser.username,
         });
 
-        return {
-            token,
-            user: pick(newUser, "userId", "email", "username", "createdAt"),
-        };
+        return { token };
     }
 
     async login(payload: LoginDto): Promise<LoginResponseDto> {
@@ -68,10 +64,7 @@ export class UserService {
             username: user.username,
         });
 
-        return {
-            token,
-            user: pick(user, "userId", "email", "username"),
-        };
+        return { token };
     }
 
     async loginWithGoogle(payload: GoogleLoginDto): Promise<GoogleLoginResponseDto> {
@@ -101,9 +94,6 @@ export class UserService {
             username: user.username,
         });
 
-        return {
-            token,
-            user: pick(user, "userId", "email", "username", "createdAt"),
-        };
+        return { token };
     }
 }

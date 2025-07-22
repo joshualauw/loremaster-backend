@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Post, Req, Res, UseGuards } from "@nestjs/common";
 import { apiResponse } from "src/core/utils/apiResponse";
 import { Public } from "src/modules/auth/decorators/public.decorator";
 import { LoginResponseDto } from "src/modules/user/dtos/response/login-response.dto";
@@ -9,10 +9,16 @@ import { UserService } from "src/modules/user/user.service";
 import { ApiResponse } from "src/types/ApiResponse";
 import { GoogleAuthGuard } from "src/modules/auth/guards/google-auth.guard";
 import { GoogleUserPayload } from "src/types/GoogleUserPayload";
+import { Request, Response } from "express";
+import { ConfigType } from "@nestjs/config";
+import commonConfig from "src/config/common.config";
 
-@Controller("user")
+@Controller("api/user")
 export class UserController {
-    constructor(private userService: UserService) {}
+    constructor(
+        private userService: UserService,
+        @Inject(commonConfig.KEY) private commonCfg: ConfigType<typeof commonConfig>,
+    ) {}
 
     @Post("register")
     @Public()
@@ -29,17 +35,19 @@ export class UserController {
         return apiResponse("login success", res);
     }
 
-    @Get("google")
+    @Get("login-google")
     @Public()
     @UseGuards(GoogleAuthGuard)
     async googleLogin() {}
 
-    @Get("google/callback")
+    @Get("login-google/callback")
     @Public()
     @UseGuards(GoogleAuthGuard)
-    async googleLoginCallback(@Req() req) {
+    async googleLoginCallback(@Req() req: Request, @Res() res: Response): Promise<void> {
         const payload = req.user as GoogleUserPayload;
-        const res = await this.userService.loginWithGoogle(payload);
-        return apiResponse("login success", res);
+        console.log(payload);
+        const result = await this.userService.loginWithGoogle(payload);
+
+        return res.redirect(this.commonCfg.frontendUrl + `/api/auth/google-login?token=${result.token}`);
     }
 }

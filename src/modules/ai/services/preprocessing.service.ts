@@ -62,7 +62,7 @@ export class PreprocessingService {
         return { vectors, values };
     }
 
-    async storeChunks(data: StoreChunksDto) {
+    async storeChunks(data: StoreChunksDto): Promise<void> {
         const { documentId, values, vectors } = data;
 
         const tempValues: any[] = [];

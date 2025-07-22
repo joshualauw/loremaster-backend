@@ -8,7 +8,6 @@ import { LoginResponseDto } from "src/modules/user/dtos/response/login-response.
 import { pick } from "src/core/utils/mapper";
 import { GoogleLoginDto } from "src/modules/user/dtos/request/google-login.dto";
 import { GoogleLoginResponseDto } from "src/modules/user/dtos/response/google-login-response.dto";
-import { User } from "@prisma/client";
 
 @Injectable()
 export class UserService {

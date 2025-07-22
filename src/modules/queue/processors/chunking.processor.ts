@@ -15,7 +15,7 @@ export class ChunkingProcessor extends WorkerHost {
         super();
     }
 
-    async process(job: Job<ChunkingTaskDto>) {
+    async process(job: Job<ChunkingTaskDto>): Promise<void> {
         try {
             const document = await this.prisma.document.findFirstOrThrow({
                 where: { documentId: job.data.documentId },

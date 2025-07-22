@@ -5,6 +5,10 @@ import { apiResponse } from "src/core/utils/apiResponse";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { UserJwtPayload } from "src/types/UserJwtPayload";
 import { UpdateStoryBody } from "src/modules/story/dtos/request/update-story.dto";
+import { ApiResponse } from "src/types/ApiResponse";
+import { CreateStoryResponseDto } from "src/modules/story/dtos/response/create-story-response.dto";
+import { UpdateStoryResponseDto } from "src/modules/story/dtos/response/update-story-response.dto";
+import { DeleteStoryResponseDto } from "src/modules/story/dtos/response/delete-story-response.dto";
 
 @Controller("story")
 export class StoryController {
@@ -12,19 +16,29 @@ export class StoryController {
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    async create(@CurrentUser() user: UserJwtPayload, @Body() body: CreateStoryBody) {
+    async create(
+        @CurrentUser() user: UserJwtPayload,
+        @Body() body: CreateStoryBody,
+    ): Promise<ApiResponse<CreateStoryResponseDto>> {
         const res = await this.storyService.create({ ...body, userId: user.id });
         return apiResponse("story created", res);
     }
 
     @Put(":id")
-    async update(@Param("id") id: number, @CurrentUser() user: UserJwtPayload, @Body() body: UpdateStoryBody) {
+    async update(
+        @Param("id") id: number,
+        @CurrentUser() user: UserJwtPayload,
+        @Body() body: UpdateStoryBody,
+    ): Promise<ApiResponse<UpdateStoryResponseDto>> {
         const res = await this.storyService.update({ ...body, storyId: id, userId: user.id });
         return apiResponse("story updated", res);
     }
 
     @Delete(":id")
-    async delete(@Param("id") id: number, @CurrentUser() user: UserJwtPayload) {
+    async delete(
+        @Param("id") id: number,
+        @CurrentUser() user: UserJwtPayload,
+    ): Promise<ApiResponse<DeleteStoryResponseDto>> {
         const res = await this.storyService.delete({ storyId: id, userId: user.id });
         return apiResponse("story deleted", res);
     }

@@ -50,15 +50,15 @@ export class RetrievalService {
     }
 
     //logarithmic growth
-    getMaxChunks(documentLength: number) {
+    getMaxChunks(documentLength: number): number {
         const chunkCount = Math.ceil(
             this.aiCfg.vectorSearchBasechunks + Math.log2(documentLength) * this.aiCfg.vectorSearchGrowthFactor,
         );
         return Math.min(chunkCount, this.aiCfg.vectorSearchMaximumChunks);
     }
 
-    async queryExpansion(query: string) {
-        return this.openai.getStructuredResponse<QueryExpansion>(
+    async queryExpansion(query: string): Promise<QueryExpansion> {
+        return this.openai.getStructuredResponse(
             queryExpansionPrompt(query),
             zodTextFormat(queryExpansionSchema, "query_expansion"),
         );

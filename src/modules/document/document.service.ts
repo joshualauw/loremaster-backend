@@ -19,7 +19,7 @@ export class DocumentService {
         @InjectQueue(QueueKey.CHUNKING) private queue: Queue,
     ) {}
 
-    async canChangeDocument(storyId: number, userId: number) {
+    async canChangeDocument(storyId: number, userId: number): Promise<void> {
         const story = await this.prisma.story.findFirstOrThrow({
             where: { storyId },
         });

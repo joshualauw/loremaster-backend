@@ -17,7 +17,7 @@ export class GeneratingProcessor extends WorkerHost {
         super();
     }
 
-    async process(job: Job<GeneratingTaskDto>) {
+    async process(job: Job<GeneratingTaskDto>): Promise<void> {
         try {
             const { sceneId, materials, options } = job.data;
             const { documentIds, intent } = materials;

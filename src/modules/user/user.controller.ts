@@ -12,6 +12,9 @@ import { GoogleUserPayload } from "src/types/GoogleUserPayload";
 import { Request, Response } from "express";
 import { ConfigType } from "@nestjs/config";
 import commonConfig from "src/config/common.config";
+import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
+import { UserJwtPayload } from "src/types/UserJwtPayload";
+import { MeResponseDto } from "src/modules/user/dtos/response/me-response.dto";
 
 @Controller("api/user")
 export class UserController {
@@ -19,6 +22,12 @@ export class UserController {
         private userService: UserService,
         @Inject(commonConfig.KEY) private commonCfg: ConfigType<typeof commonConfig>,
     ) {}
+
+    @Get("me")
+    async me(@CurrentUser() user: UserJwtPayload): Promise<ApiResponse<MeResponseDto>> {
+        const res = await this.userService.me({ userId: user.id });
+        return apiResponse("get me success", res);
+    }
 
     @Post("register")
     @Public()
@@ -45,7 +54,6 @@ export class UserController {
     @UseGuards(GoogleAuthGuard)
     async googleLoginCallback(@Req() req: Request, @Res() res: Response): Promise<void> {
         const payload = req.user as GoogleUserPayload;
-        console.log(payload);
         const result = await this.userService.loginWithGoogle(payload);
 
         return res.redirect(this.commonCfg.frontendUrl + `/api/auth/google-login?token=${result.token}`);

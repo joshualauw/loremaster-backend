@@ -7,6 +7,9 @@ import { LoginDto } from "src/modules/user/dtos/request/login.dto";
 import { LoginResponseDto } from "src/modules/user/dtos/response/login-response.dto";
 import { GoogleLoginDto } from "src/modules/user/dtos/request/google-login.dto";
 import { GoogleLoginResponseDto } from "src/modules/user/dtos/response/google-login-response.dto";
+import { MeDto } from "src/modules/user/dtos/request/me.dto";
+import { MeResponseDto } from "src/modules/user/dtos/response/me-response.dto";
+import { pick } from "src/core/utils/mapper";
 
 @Injectable()
 export class UserService {
@@ -14,6 +17,16 @@ export class UserService {
         private prisma: PrismaService,
         private authService: AuthService,
     ) {}
+
+    async me(payload: MeDto): Promise<MeResponseDto> {
+        const { userId } = payload;
+
+        const user = await this.prisma.user.findFirstOrThrow({
+            where: { userId },
+        });
+
+        return pick(user, "userId", "username", "email", "profileUrl", "createdAt");
+    }
 
     async register(payload: RegisterDto): Promise<RegisterResponseDto> {
         const { email, password, username } = payload;

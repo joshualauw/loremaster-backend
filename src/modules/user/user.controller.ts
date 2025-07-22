@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from "@nestjs/common";
 import { apiResponse } from "src/core/utils/apiResponse";
 import { Public } from "src/modules/auth/decorators/public.decorator";
 import { LoginResponseDto } from "src/modules/user/dtos/response/login-response.dto";
@@ -7,6 +7,8 @@ import { RegisterResponseDto } from "src/modules/user/dtos/response/register-res
 import { RegisterBody } from "src/modules/user/dtos/request/register.dto";
 import { UserService } from "src/modules/user/user.service";
 import { ApiResponse } from "src/types/ApiResponse";
+import { GoogleAuthGuard } from "src/modules/auth/guards/google-auth.guard";
+import { GoogleUserPayload } from "src/types/GoogleUserPayload";
 
 @Controller("user")
 export class UserController {
@@ -24,6 +26,20 @@ export class UserController {
     @HttpCode(HttpStatus.OK)
     async login(@Body() body: LoginBody): Promise<ApiResponse<LoginResponseDto>> {
         const res = await this.userService.login(body);
+        return apiResponse("login success", res);
+    }
+
+    @Get("google")
+    @Public()
+    @UseGuards(GoogleAuthGuard)
+    async googleLogin() {}
+
+    @Get("google/callback")
+    @Public()
+    @UseGuards(GoogleAuthGuard)
+    async googleLoginCallback(@Req() req) {
+        const payload = req.user as GoogleUserPayload;
+        const res = await this.userService.loginWithGoogle(payload);
         return apiResponse("login success", res);
     }
 }

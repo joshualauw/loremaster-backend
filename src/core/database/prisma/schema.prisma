@@ -27,6 +27,11 @@ enum JobStatus {
   FAILED
 }
 
+enum AuthProvider {
+  GOOGLE
+  LOCAL
+}
+
 // Models
 
 model User {
@@ -35,7 +40,9 @@ model User {
   email       String        @unique @db.VarChar(255)
   password    String
   profileUrl  String?
-  credit      Int
+  credit      Int           @default(0)
+  provider    AuthProvider
+  providerId  String?
   Story       Story[]
   Transaction Transaction[]
   createdAt   DateTime      @default(now())

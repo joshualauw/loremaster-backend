@@ -6,6 +6,9 @@ import { AuthService } from "src/modules/auth/auth.service";
 import { LoginDto } from "src/modules/user/dtos/request/login.dto";
 import { LoginResponseDto } from "src/modules/user/dtos/response/login-response.dto";
 import { pick } from "src/core/utils/mapper";
+import { GoogleLoginDto } from "src/modules/user/dtos/request/google-login.dto";
+import { GoogleLoginResponseDto } from "src/modules/user/dtos/response/google-login-response.dto";
+import { User } from "@prisma/client";
 
 @Injectable()
 export class UserService {
@@ -28,7 +31,7 @@ export class UserService {
                 email,
                 username,
                 password: hashedPassword,
-                credit: 0,
+                provider: "LOCAL",
             },
         });
 
@@ -69,6 +72,39 @@ export class UserService {
         return {
             token,
             user: pick(user, "userId", "email", "username"),
+        };
+    }
+
+    async loginWithGoogle(payload: GoogleLoginDto): Promise<GoogleLoginResponseDto> {
+        const { email, name, id, photoUrl } = payload;
+
+        let user = await this.prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (!user) {
+            user = await this.prisma.user.create({
+                data: {
+                    email,
+                    username: name,
+                    password: "",
+                    provider: "GOOGLE",
+                    providerId: id,
+                    profileUrl: photoUrl,
+                },
+            });
+        }
+
+        const token = this.authService.generateToken({
+            sub: user.userId.toString(),
+            id: user.userId,
+            email: user.email,
+            username: user.username,
+        });
+
+        return {
+            token,
+            user: pick(user, "userId", "email", "username", "createdAt"),
         };
     }
 }

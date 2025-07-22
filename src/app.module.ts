@@ -14,12 +14,13 @@ import commonConfig from "src/config/common.config";
 import bullmqConfig from "src/config/bullmq.config";
 import openaiConfig from "src/config/openai.config";
 import aiConfig from "src/config/ai.config";
+import googleAuthConfig from "src/config/google-auth.config";
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            load: [jwtConfig, commonConfig, bullmqConfig, openaiConfig, aiConfig],
+            load: [jwtConfig, commonConfig, bullmqConfig, openaiConfig, aiConfig, googleAuthConfig],
         }),
         QueueModule,
         UserModule,

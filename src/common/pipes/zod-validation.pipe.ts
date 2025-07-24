@@ -15,7 +15,7 @@ export class ZodValidationPipe implements PipeTransform {
             return parsedValue;
         } catch (e) {
             if (e instanceof ZodError) {
-                const errors = e.errors.map((ed) => ed.message);
+                const errors = e.errors.map((zd) => `${zd.path} ${zd.message}`.toLowerCase());
                 throw new BadRequestException(errors);
             }
             throw new BadRequestException("Validation failed");

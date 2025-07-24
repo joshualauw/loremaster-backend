@@ -1,14 +1,11 @@
-import { IsString, IsNotEmpty } from "class-validator";
+import z from "zod";
 
-export class CreateStoryBody {
-    @IsString()
-    @IsNotEmpty()
-    title: string;
+export const createStoryBodyScema = z.object({
+    title: z.string(),
+    description: z.string(),
+});
 
-    @IsString()
-    @IsNotEmpty()
-    description: string;
-}
+export type CreateStoryBody = z.infer<typeof createStoryBodyScema>;
 
 export type CreateStoryDto = CreateStoryBody & {
     userId: number;

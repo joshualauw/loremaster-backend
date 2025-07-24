@@ -1,15 +1,16 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Put, Param, Delete, Get } from "@nestjs/common";
+import { Controller, Post, Body, HttpCode, HttpStatus, Put, Param, Delete, Get, UsePipes } from "@nestjs/common";
 import { StoryService } from "./story.service";
-import { CreateStoryBody } from "./dtos/request/create-story.dto";
+import { CreateStoryBody, createStoryBodyScema } from "./dtos/request/create-story.dto";
 import { apiResponse } from "src/core/utils/apiResponse";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { UserJwtPayload } from "src/types/user-jwt-payload";
-import { UpdateStoryBody } from "src/modules/story/dtos/request/update-story.dto";
+import { UpdateStoryBody, updateStoryBodyScema } from "src/modules/story/dtos/request/update-story.dto";
 import { ApiResponse } from "src/types/api-response";
 import { CreateStoryResponseDto } from "src/modules/story/dtos/response/create-story-response.dto";
 import { UpdateStoryResponseDto } from "src/modules/story/dtos/response/update-story-response.dto";
 import { DeleteStoryResponseDto } from "src/modules/story/dtos/response/delete-story-response.dto";
 import { GetAllStoryResponseDto } from "src/modules/story/dtos/response/get-all-story.response.dto";
+import { ZodValidationPipe } from "src/common/pipes/zod-validation.pipe";
 
 @Controller("api/story")
 export class StoryController {
@@ -22,6 +23,7 @@ export class StoryController {
     }
 
     @Post()
+    @UsePipes(new ZodValidationPipe(createStoryBodyScema))
     @HttpCode(HttpStatus.CREATED)
     async create(
         @CurrentUser() user: UserJwtPayload,
@@ -32,6 +34,7 @@ export class StoryController {
     }
 
     @Put(":id")
+    @UsePipes(new ZodValidationPipe(updateStoryBodyScema))
     async update(
         @Param("id") id: number,
         @CurrentUser() user: UserJwtPayload,

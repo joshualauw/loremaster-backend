@@ -1,26 +1,17 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
-import { Match } from "src/common/decorators/match.decorator";
+import { z } from "zod";
 
-export class RegisterBody {
-    @IsEmail()
-    @IsNotEmpty()
-    email: string;
+export const registerBodySchema = z
+    .object({
+        email: z.string().email(),
+        password: z.string().min(6),
+        confirmPassword: z.string().min(6),
+        username: z.string().min(6),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+        message: "Confirm password does not match",
+        path: ["confirmPassword"],
+    });
 
-    @IsString()
-    @MinLength(6)
-    @IsNotEmpty()
-    password: string;
-
-    @IsString()
-    @MinLength(6)
-    @IsNotEmpty()
-    @Match("password", { message: "Confirm password does not match" })
-    confirmPassword: string;
-
-    @IsString()
-    @MinLength(6)
-    @IsNotEmpty()
-    username: string;
-}
+export type RegisterBody = z.infer<typeof registerBodySchema>;
 
 export type RegisterDto = RegisterBody;

@@ -1,37 +1,19 @@
-import { Type } from "class-transformer";
-import { IsNotEmpty, IsArray, IsString, ValidateNested } from "class-validator";
+import z from "zod";
 
-class SceneOptionsBody {
-    @IsString()
-    tone: string;
+export const createSceneBodySchema = z.object({
+    materials: z.object({
+        documentIds: z.array(z.number()),
+        intent: z.string(),
+    }),
+    options: z.object({
+        tone: z.string(),
+        atmosphere: z.string(),
+        conflict: z.string(),
+        description: z.string(),
+    }),
+});
 
-    @IsString()
-    atmosphere: string;
-
-    @IsString()
-    conflict: string;
-
-    @IsString()
-    @IsNotEmpty()
-    description: string;
-}
-
-class SceneMaterialsBody {
-    @IsArray()
-    documentIds: number[];
-
-    @IsString()
-    intent: string;
-}
-export class CreateSceneBody {
-    @ValidateNested()
-    @Type(() => SceneMaterialsBody)
-    materials: SceneMaterialsBody;
-
-    @ValidateNested()
-    @Type(() => SceneOptionsBody)
-    options: SceneOptionsBody;
-}
+export type CreateSceneBody = z.infer<typeof createSceneBodySchema>;
 
 export type CreateSceneDto = CreateSceneBody & {
     storyId: number;

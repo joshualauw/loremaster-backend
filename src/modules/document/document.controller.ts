@@ -3,9 +3,9 @@ import { ZodValidationPipe } from "src/common/pipes/zod-validation.pipe";
 import { apiResponse } from "src/core/utils/apiResponse";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { DocumentService } from "src/modules/document/document.service";
-import { CreateDocumentBody } from "src/modules/document/dtos/request/create-document.dto";
+import { CreateDocumentBody, createDocumentBodySchema } from "src/modules/document/dtos/request/create-document.dto";
 import { GetAllDocumentQuery, getAllDocumentQuerySchema } from "src/modules/document/dtos/request/get-all-document.dto";
-import { UpdateDocumentBody } from "src/modules/document/dtos/request/update-document.dto";
+import { UpdateDocumentBody, updateDocumentBodySchema } from "src/modules/document/dtos/request/update-document.dto";
 import { CreateDocumentResponseDto } from "src/modules/document/dtos/response/create-document-response.dto";
 import { DeleteDocumentResponseDto } from "src/modules/document/dtos/response/delete-document-response.dto";
 import { GetAllDocumentResponseDto } from "src/modules/document/dtos/response/get-all-document.dto";
@@ -29,6 +29,7 @@ export class DocumentController {
     }
 
     @Post(":storyId")
+    @UsePipes(new ZodValidationPipe(createDocumentBodySchema))
     async create(
         @Param("storyId") storyId: number,
         @CurrentUser() user: UserJwtPayload,
@@ -39,6 +40,7 @@ export class DocumentController {
     }
 
     @Put(":documentId")
+    @UsePipes(new ZodValidationPipe(updateDocumentBodySchema))
     async update(
         @Param("documentId") documentId: number,
         @CurrentUser() user: UserJwtPayload,

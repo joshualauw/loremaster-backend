@@ -1,21 +1,17 @@
-import { IsArray, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import z from "zod";
 
-export class CreateDocumentBody {
-    @IsString()
-    @IsNotEmpty()
-    name: string;
+export const createDocumentBodySchema = z.object({
+    name: z.string(),
+    fields: z.array(
+        z.object({
+            label: z.string(),
+            content: z.string(),
+        }),
+    ),
+    categoryId: z.number(),
+});
 
-    @IsArray()
-    @IsNotEmpty()
-    fields: {
-        label: string;
-        content: string;
-    }[];
-
-    @IsNumber()
-    @IsNotEmpty()
-    categoryId: number;
-}
+export type CreateDocumentBody = z.infer<typeof createDocumentBodySchema>;
 
 export type CreateDocumentDto = CreateDocumentBody & {
     storyId: number;

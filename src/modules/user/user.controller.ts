@@ -1,10 +1,22 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Post, Req, Res, UseGuards } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Inject,
+    Post,
+    Req,
+    Res,
+    UseGuards,
+    UsePipes,
+} from "@nestjs/common";
 import { apiResponse } from "src/core/utils/apiResponse";
 import { Public } from "src/modules/auth/decorators/public.decorator";
 import { LoginResponseDto } from "src/modules/user/dtos/response/login-response.dto";
-import { LoginBody } from "src/modules/user/dtos/request/login.dto";
+import { LoginBody, loginBodySchema } from "src/modules/user/dtos/request/login.dto";
 import { RegisterResponseDto } from "src/modules/user/dtos/response/register-response.dto";
-import { RegisterBody } from "src/modules/user/dtos/request/register.dto";
+import { RegisterBody, registerBodySchema } from "src/modules/user/dtos/request/register.dto";
 import { UserService } from "src/modules/user/user.service";
 import { ApiResponse } from "src/types/api-response";
 import { GoogleAuthGuard } from "src/modules/auth/guards/google-auth.guard";
@@ -15,6 +27,7 @@ import commonConfig from "src/config/common.config";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
 import { UserJwtPayload } from "src/types/user-jwt-payload";
 import { MeResponseDto } from "src/modules/user/dtos/response/me-response.dto";
+import { ZodValidationPipe } from "src/common/pipes/zod-validation.pipe";
 
 @Controller("api/user")
 export class UserController {
@@ -30,6 +43,7 @@ export class UserController {
     }
 
     @Post("register")
+    @UsePipes(new ZodValidationPipe(registerBodySchema))
     @Public()
     async register(@Body() body: RegisterBody): Promise<ApiResponse<RegisterResponseDto>> {
         const res = await this.userService.register(body);
@@ -37,6 +51,7 @@ export class UserController {
     }
 
     @Post("login")
+    @UsePipes(new ZodValidationPipe(loginBodySchema))
     @Public()
     @HttpCode(HttpStatus.OK)
     async login(@Body() body: LoginBody): Promise<ApiResponse<LoginResponseDto>> {

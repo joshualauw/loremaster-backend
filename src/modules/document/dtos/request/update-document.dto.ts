@@ -1,21 +1,17 @@
-import { IsArray, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import z from "zod";
 
-export class UpdateDocumentBody {
-    @IsString()
-    @IsNotEmpty()
-    name: string;
+export const updateDocumentBodySchema = z.object({
+    name: z.string(),
+    fields: z.array(
+        z.object({
+            label: z.string(),
+            content: z.string(),
+        }),
+    ),
+    categoryId: z.number(),
+});
 
-    @IsArray()
-    @IsNotEmpty()
-    fields: {
-        label: string;
-        content: string;
-    }[];
-
-    @IsNumber()
-    @IsNotEmpty()
-    categoryId: number;
-}
+export type UpdateDocumentBody = z.infer<typeof updateDocumentBodySchema>;
 
 export type UpdateDocumentDto = UpdateDocumentBody & {
     documentId: number;

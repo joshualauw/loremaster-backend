@@ -7,6 +7,8 @@ import { UpdateStoryResponseDto } from "src/modules/story/dtos/response/update-s
 import { DeleteStoryDto } from "src/modules/story/dtos/request/delete-story.dto";
 import { DeleteStoryResponseDto } from "src/modules/story/dtos/response/delete-story-response.dto";
 import { omit, pick } from "src/core/utils/mapper";
+import { GetAllStoryDto } from "src/modules/story/dtos/request/get-all-story.dto";
+import { GetAllStoryResponseDto } from "src/modules/story/dtos/response/get-all-story.response.dto";
 
 @Injectable()
 export class StoryService {
@@ -20,6 +22,16 @@ export class StoryService {
         if (story.userId != userId) {
             throw new ForbiddenException("User doesn't have permission to access story");
         }
+    }
+
+    async getAllStory(payload: GetAllStoryDto): Promise<GetAllStoryResponseDto> {
+        const { userId } = payload;
+
+        const stories = await this.prisma.story.findMany({
+            where: { userId },
+        });
+
+        return stories.map((s) => pick(s, "storyId", "title", "logoUrl", "updatedAt"));
     }
 
     async create(payload: CreateStoryDto): Promise<CreateStoryResponseDto> {

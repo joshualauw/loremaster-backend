@@ -9,10 +9,17 @@ import { ApiResponse } from "src/types/ApiResponse";
 import { CreateStoryResponseDto } from "src/modules/story/dtos/response/create-story-response.dto";
 import { UpdateStoryResponseDto } from "src/modules/story/dtos/response/update-story-response.dto";
 import { DeleteStoryResponseDto } from "src/modules/story/dtos/response/delete-story-response.dto";
+import { GetAllStoryResponseDto } from "src/modules/story/dtos/response/get-all-story.response.dto";
 
 @Controller("api/story")
 export class StoryController {
     constructor(private readonly storyService: StoryService) {}
+
+    @Get()
+    async getAllStory(@CurrentUser() user: UserJwtPayload): Promise<ApiResponse<GetAllStoryResponseDto>> {
+        const res = await this.storyService.getAllStory({ userId: user.id });
+        return apiResponse("get all story fetched", res);
+    }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)

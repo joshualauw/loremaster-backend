@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsNumber, IsString, MaxLength } from "class-validator";
+import { IsArray, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class UpdateDocumentBody {
     @IsString()

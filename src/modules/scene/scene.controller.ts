@@ -4,8 +4,8 @@ import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator"
 import { CreateSceneBody } from "src/modules/scene/dtos/request/create-scene.dto";
 import { CreateSceneResponseDto } from "src/modules/scene/dtos/response/create-scene-response.dto";
 import { SceneService } from "src/modules/scene/scene.service";
-import { ApiResponse } from "src/types/ApiResponse";
-import { UserJwtPayload } from "src/types/UserJwtPayload";
+import { ApiResponse } from "src/types/api-response";
+import { UserJwtPayload } from "src/types/user-jwt-payload";
 
 @Controller("api/scene")
 export class SceneController {

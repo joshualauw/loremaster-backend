@@ -11,6 +11,8 @@ import { DeleteDocumentResponseDto } from "src/modules/document/dtos/response/de
 import { UpdateDocumentResponseDto } from "src/modules/document/dtos/response/update-document-response.dto";
 import { ChunkingTaskDto } from "src/modules/queue/dtos/request/chunking-task.dto";
 import { pick } from "src/core/utils/mapper";
+import { GetAllDocumentDto } from "src/modules/document/dtos/request/get-all-document.dto";
+import { GetAllDocumentResponseDto } from "src/modules/document/dtos/response/get-all-document.dto";
 
 @Injectable()
 export class DocumentService {
@@ -27,6 +29,35 @@ export class DocumentService {
         if (story.userId != userId) {
             throw new ForbiddenException("User doesn't have permission to access document");
         }
+    }
+
+    async getAll(payload: GetAllDocumentDto): Promise<GetAllDocumentResponseDto> {
+        const { userId, storyId, categoryId, page, sortBy } = payload;
+
+        await this.canChangeDocument(storyId, userId);
+
+        const limit = 10;
+        const offset = (page - 1) * limit;
+
+        const documents = await this.prisma.document.findMany({
+            where: {
+                storyId,
+                ...(categoryId != 0 && { categoryId }),
+            },
+            include: {
+                category: { select: { name: true } },
+            },
+            orderBy: {
+                createdAt: sortBy == "latest" ? "asc" : "desc",
+            },
+            skip: offset,
+            take: limit,
+        });
+
+        return documents.map((d) => ({
+            ...pick(d, "documentId", "name", "categoryId"),
+            categoryName: d.category.name,
+        }));
     }
 
     async create(payload: CreateDocumentDto): Promise<CreateDocumentResponseDto> {

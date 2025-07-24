@@ -6,14 +6,14 @@ import { LoginBody } from "src/modules/user/dtos/request/login.dto";
 import { RegisterResponseDto } from "src/modules/user/dtos/response/register-response.dto";
 import { RegisterBody } from "src/modules/user/dtos/request/register.dto";
 import { UserService } from "src/modules/user/user.service";
-import { ApiResponse } from "src/types/ApiResponse";
+import { ApiResponse } from "src/types/api-response";
 import { GoogleAuthGuard } from "src/modules/auth/guards/google-auth.guard";
-import { GoogleUserPayload } from "src/types/GoogleUserPayload";
+import { GoogleUserPayload } from "src/types/google-user-payload";
 import { Request, Response } from "express";
 import { ConfigType } from "@nestjs/config";
 import commonConfig from "src/config/common.config";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
-import { UserJwtPayload } from "src/types/UserJwtPayload";
+import { UserJwtPayload } from "src/types/user-jwt-payload";
 import { MeResponseDto } from "src/modules/user/dtos/response/me-response.dto";
 
 @Controller("api/user")

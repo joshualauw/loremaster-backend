@@ -3,7 +3,7 @@ import { PrismaClientKnownRequestError, PrismaClientValidationError } from "@pri
 import { Request, Response } from "express";
 import { errorResponse } from "src/core/utils/apiResponse";
 import { toUpperUnderscore } from "src/core/utils/common";
-import { ApiResponse } from "src/types/ApiResponse";
+import { ApiResponse } from "src/types/api-response";
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {

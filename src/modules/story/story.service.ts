@@ -24,7 +24,7 @@ export class StoryService {
         }
     }
 
-    async getAllStory(payload: GetAllStoryDto): Promise<GetAllStoryResponseDto> {
+    async getAll(payload: GetAllStoryDto): Promise<GetAllStoryResponseDto> {
         const { userId } = payload;
 
         const stories = await this.prisma.story.findMany({

@@ -1,4 +1,4 @@
-import { ApiResponse } from "src/types/ApiResponse";
+import { ApiResponse } from "src/types/api-response";
 
 export function apiResponse<T>(message: string, data?: T): ApiResponse<T> {
     return {

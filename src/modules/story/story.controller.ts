@@ -3,9 +3,9 @@ import { StoryService } from "./story.service";
 import { CreateStoryBody } from "./dtos/request/create-story.dto";
 import { apiResponse } from "src/core/utils/apiResponse";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
-import { UserJwtPayload } from "src/types/UserJwtPayload";
+import { UserJwtPayload } from "src/types/user-jwt-payload";
 import { UpdateStoryBody } from "src/modules/story/dtos/request/update-story.dto";
-import { ApiResponse } from "src/types/ApiResponse";
+import { ApiResponse } from "src/types/api-response";
 import { CreateStoryResponseDto } from "src/modules/story/dtos/response/create-story-response.dto";
 import { UpdateStoryResponseDto } from "src/modules/story/dtos/response/update-story-response.dto";
 import { DeleteStoryResponseDto } from "src/modules/story/dtos/response/delete-story-response.dto";
@@ -16,8 +16,8 @@ export class StoryController {
     constructor(private readonly storyService: StoryService) {}
 
     @Get()
-    async getAllStory(@CurrentUser() user: UserJwtPayload): Promise<ApiResponse<GetAllStoryResponseDto>> {
-        const res = await this.storyService.getAllStory({ userId: user.id });
+    async getAll(@CurrentUser() user: UserJwtPayload): Promise<ApiResponse<GetAllStoryResponseDto>> {
+        const res = await this.storyService.getAll({ userId: user.id });
         return apiResponse("get all story fetched", res);
     }
 

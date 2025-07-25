@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UsePipes } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, UsePipes } from "@nestjs/common";
 import { ZodValidationPipe } from "src/common/pipes/zod-validation.pipe";
 import { apiResponse } from "src/core/utils/apiResponse";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
@@ -20,7 +20,7 @@ export class DocumentController {
     @Get(":storyId")
     @UsePipes(new ZodValidationPipe(getAllDocumentQuerySchema, "query"))
     async getAll(
-        @Param("storyId") storyId: number,
+        @Param("storyId", ParseIntPipe) storyId: number,
         @CurrentUser() user: UserJwtPayload,
         @Query() query: GetAllDocumentQuery,
     ): Promise<ApiResponse<GetAllDocumentResponseDto>> {
@@ -31,7 +31,7 @@ export class DocumentController {
     @Post(":storyId")
     @UsePipes(new ZodValidationPipe(createDocumentBodySchema))
     async create(
-        @Param("storyId") storyId: number,
+        @Param("storyId", ParseIntPipe) storyId: number,
         @CurrentUser() user: UserJwtPayload,
         @Body() body: CreateDocumentBody,
     ): Promise<ApiResponse<CreateDocumentResponseDto>> {
@@ -42,7 +42,7 @@ export class DocumentController {
     @Put(":documentId")
     @UsePipes(new ZodValidationPipe(updateDocumentBodySchema))
     async update(
-        @Param("documentId") documentId: number,
+        @Param("documentId", ParseIntPipe) documentId: number,
         @CurrentUser() user: UserJwtPayload,
         @Body() body: UpdateDocumentBody,
     ): Promise<ApiResponse<UpdateDocumentResponseDto>> {
@@ -52,7 +52,7 @@ export class DocumentController {
 
     @Delete(":documentId")
     async delete(
-        @Param("documentId") documentId: number,
+        @Param("documentId", ParseIntPipe) documentId: number,
         @CurrentUser() user: UserJwtPayload,
     ): Promise<ApiResponse<DeleteDocumentResponseDto>> {
         const res = await this.documentService.delete({ userId: user.id, documentId });

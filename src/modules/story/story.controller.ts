@@ -1,4 +1,16 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Put, Param, Delete, Get, UsePipes } from "@nestjs/common";
+import {
+    Controller,
+    Post,
+    Body,
+    HttpCode,
+    HttpStatus,
+    Put,
+    Param,
+    Delete,
+    Get,
+    UsePipes,
+    ParseIntPipe,
+} from "@nestjs/common";
 import { StoryService } from "./story.service";
 import { CreateStoryBody, createStoryBodyScema } from "./dtos/request/create-story.dto";
 import { apiResponse } from "src/core/utils/apiResponse";
@@ -36,7 +48,7 @@ export class StoryController {
     @Put(":id")
     @UsePipes(new ZodValidationPipe(updateStoryBodyScema))
     async update(
-        @Param("id") id: number,
+        @Param("id", ParseIntPipe) id: number,
         @CurrentUser() user: UserJwtPayload,
         @Body() body: UpdateStoryBody,
     ): Promise<ApiResponse<UpdateStoryResponseDto>> {
@@ -46,7 +58,7 @@ export class StoryController {
 
     @Delete(":id")
     async delete(
-        @Param("id") id: number,
+        @Param("id", ParseIntPipe) id: number,
         @CurrentUser() user: UserJwtPayload,
     ): Promise<ApiResponse<DeleteStoryResponseDto>> {
         const res = await this.storyService.delete({ storyId: id, userId: user.id });

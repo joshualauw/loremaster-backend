@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UsePipes } from "@nestjs/common";
+import { Body, Controller, Param, ParseIntPipe, Post, UsePipes } from "@nestjs/common";
 import { ZodValidationPipe } from "src/common/pipes/zod-validation.pipe";
 import { apiResponse } from "src/core/utils/apiResponse";
 import { CurrentUser } from "src/modules/auth/decorators/current-user.decorator";
@@ -15,7 +15,7 @@ export class SceneController {
     @Post(":storyId")
     @UsePipes(new ZodValidationPipe(createSceneBodySchema))
     async create(
-        @Param("storyId") storyId: number,
+        @Param("storyId", ParseIntPipe) storyId: number,
         @CurrentUser() user: UserJwtPayload,
         @Body() body: CreateSceneBody,
     ): Promise<ApiResponse<CreateSceneResponseDto>> {
